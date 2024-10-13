@@ -1,8 +1,6 @@
 import axios from 'axios'
 import mapboxgl from 'mapbox-gl';
-import { ref } from 'vue'
-const marker = ref(null);
-export function getNoiseHistory(lng, lat, time, map,HeadValue) {
+export function getNoiseHistory(lng, lat, time, map, HeadValue) {
     // 创建请求体数据
     const params = {
         longitude: lng,
@@ -19,14 +17,16 @@ export function getNoiseHistory(lng, lat, time, map,HeadValue) {
             // 处理返回的数据，例如更新地图上的图层或显示数据
             const coordinates = response.data[0].result.geometry.coordinates
             const noiseHistory = response.data[0].result.properties.laeq
+            const idreceiver = response.data[0].result.properties.idreceiver
+            HeadValue.idreceiver = idreceiver
             HeadValue.history = noiseHistory
             console.log("噪声点坐标", coordinates)
             // 如果上一次的 marker 存在，先将其移除
-            if (marker.value) {
-                marker.value.remove();
+            if (HeadValue.marker) {
+                HeadValue.marker.remove();
             }
             // 创建新的 marker 并添加到地图
-            marker.value = new mapboxgl.Marker()
+            HeadValue.marker = new mapboxgl.Marker()
                 .setLngLat(coordinates)
                 .addTo(map.value);
         })

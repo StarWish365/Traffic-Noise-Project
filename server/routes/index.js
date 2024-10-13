@@ -57,6 +57,7 @@ FROM (
   }
   );
 });
+//${time}
 router.get('/api/get_noise_value', (req, res) => {
   const time = req.query.time
   const lng = req.query.longitude
@@ -86,13 +87,13 @@ aggregated_data AS (
       array_agg(m.laeq ORDER BY m.timestep_t) AS laeq_list,
       ST_SetSRID(ST_Force2D(min(m.geom)), 4326) AS geom, -- 强制确保几何数据为 EPSG:4326
       min(cp.distance) AS distance, -- 保留最近点的距离（米）
-      20004::integer AS timestep_t -- 设置为传入的 timestep 值
+      (${time})::integer AS timestep_t -- 设置为传入的 timestep 值
   FROM 
       lday_timestep m
   JOIN 
       closest_point cp ON m.idreceiver = cp.idreceiver
   WHERE 
-      m.timestep_t <= 20004 -- 筛选出在指定时间步之前的数据
+      m.timestep_t <= ${time} -- 筛选出在指定时间步之前的数据
   GROUP BY 
       m.idreceiver
 )
@@ -121,5 +122,19 @@ FROM
     res.send(results.rows);
   });
 })
+
+router.get('/api/get_next_noise', (req, res) => {
+  var time = req.query.time;
+  var idreceiver = req.query.idreceiver;
+  let q = `SELECT laeq from lday_timestep where idreceiver = ${idreceiver} and timestep_t = ${time}`
+  pool.query(q, (err, dbResponse) => {
+    if (err) console.log(err); 
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.send(dbResponse);
+  }
+  );
+});
+
+
 
 module.exports = router;

@@ -15,7 +15,6 @@
     "chart.js": "^4.4.4",
     "element-plus": "^2.8.2",
     "interpolateheatmaplayer": "^1.5.0",
-    "leaflet": "^1.9.4",
     "leaflet-feature-legend": "^1.0.0",
     "mapbox-gl": "^3.6.0",
     "pinia": "^2.1.7",

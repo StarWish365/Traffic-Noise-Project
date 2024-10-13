@@ -6,7 +6,7 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
-import { Chart, LineController, LineElement, PointElement, LinearScale, CategoryScale } from 'chart.js';
+import { Chart, LineController, LineElement, PointElement, LinearScale, CategoryScale} from 'chart.js';
 import { useValueStore } from '@/stores/HeadValue';
 
 // 使用 Pinia store
@@ -48,6 +48,9 @@ const initChart = (laeqData = emptyData.laeq) => {
       },
       options: {
         responsive: true,
+        animation: {
+          duration: 0 // 禁用动画
+        }
       }
     });
   }
@@ -60,6 +63,24 @@ const updateChart = (laeqData) => {
   }
   initChart(laeqData); // 使用新数据重新创建图表
 };
+// 重新更新图表
+/* const updateChart = (laeqData) => {
+  if (chartInstance.value) {
+    // 更新图表的数据
+    const timesteps = Array.from(
+      { length: laeqData.length },
+      (_, i) => emptyData.timestepStart + i // 生成新的time数据
+    );
+    // 更新图表的 labels 和 data
+    chartInstance.value.data.labels = timesteps; // 更新横坐标（time）
+    chartInstance.value.data.datasets[0].data = laeqData; // 更新纵坐标（laeq）
+    console.log(chartInstance.value.data.labels,chartInstance.value.data.datasets[0].data)
+  }
+  if (chartInstance.value) {
+      chartInstance.value.update(); // 仅更新图表而不销毁
+    }
+}; */
+
 
 // 监听 `HeadValue.history` 数据的变化
 watch(
@@ -73,6 +94,7 @@ watch(
   },
   { immediate: true } // 初始时立即执行一次
 );
+
 
 // 初始化和销毁图表
 onMounted(async () => {
