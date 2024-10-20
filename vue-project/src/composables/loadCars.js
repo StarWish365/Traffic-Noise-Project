@@ -1,11 +1,11 @@
-import axios from "axios";
 import mapboxgl from 'mapbox-gl';
+import request from '../utils/request'
 
 let animationDuration = 1000; // animation duration in milliseconds
 let previousPositions = {}; // store previous positions
 
 export function load_cars(time, map, sel) {
-    axios.get('http://localhost:3000/api/get_cars_time?time=' + time).then(response => {
+    request.get('get_cars_time?time=' + time).then(response => {
         // create the dictionary for the current position
         const newPositions = response.data[0].row_to_json.features.reduce((acc, feature) => {
             const id = feature.properties.id;

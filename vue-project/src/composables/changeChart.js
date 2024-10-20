@@ -1,4 +1,4 @@
-import axios from 'axios'
+import request from '../utils/request'
 
 export function getNextNoise(idreceiver, time, HeadValue) {
     // 创建请求体数据
@@ -7,7 +7,7 @@ export function getNextNoise(idreceiver, time, HeadValue) {
         time: time
     };
     // 使用 Axios 请求后端接口
-    axios.get('http://localhost:3000/api/get_next_noise', { params })
+    request.get('get_next_noise', { params })
         .then((response) => {
             const laeq = Number(response.data.rows[0].laeq)
             console.log('服务器返回的数据:', laeq)

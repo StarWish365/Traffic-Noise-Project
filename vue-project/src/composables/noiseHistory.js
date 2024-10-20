@@ -1,4 +1,4 @@
-import axios from 'axios'
+import request from '../utils/request'
 import mapboxgl from 'mapbox-gl';
 export function getNoiseHistory(lng, lat, time, map, HeadValue) {
     // 创建请求体数据
@@ -8,10 +8,8 @@ export function getNoiseHistory(lng, lat, time, map, HeadValue) {
         time: time
     };
 
-    // 创建 ref 用于存储 marker
-
     // 使用 Axios 请求后端接口
-    axios.get('http://localhost:3000/api/get_noise_value', { params })
+    request.get('get_noise_value', { params })
         .then((response) => {
             console.log('服务器返回的数据:', response.data)
             // 处理返回的数据，例如更新地图上的图层或显示数据

@@ -1,8 +1,8 @@
-import axios from 'axios'
+import request from '../utils/request'
 import { create as interpolateHeatmapLayer } from 'interpolateheatmaplayer'
 
 export function load_noice(time, map, heatP, framebufferFactor) {
-    axios.get('http://localhost:3000/api/get_noice_time?time=' + time).then(res => {
+    request.get('get_noice_time?time=' + time).then(res => {
         const noise = res.data[0].row_to_json.features.map(feature => ({
             lat: feature.geometry.coordinates[1],
             lon: feature.geometry.coordinates[0],

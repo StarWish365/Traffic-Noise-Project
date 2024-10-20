@@ -39,7 +39,8 @@ onMounted(() => {
 
 let timeout;
 let timer_on = 0;
-const currentTime = ref(20001);
+const currentTime = ref(500);
+let iscounting = ref(false);
 
 //console.log(map)
 function cars_move() {
@@ -59,15 +60,18 @@ function startCount() {
         cars_move();
         console.log("start count")
       }
+      iscounting.value = true
 }
 function stopCount() {
     clearTimeout(timeout);
     timer_on = 0;
+    iscounting.value = false
+    console.log(iscounting)
 }
 function refreshCount() {
     if(timeout) clearTimeout(timeout);
     timer_on = 0;
-    currentTime.value = 20001;
+    currentTime.value = 500;
     if(map.value.getLayer('cars-layer')) map.value.removeLayer('cars-layer');
     if(map.value.getSource('cars')) map.value.removeSource('cars');
     if(map.value.getLayer('noise')) map.value.removeLayer('noise');
@@ -83,10 +87,12 @@ function refreshCount() {
     <div class="container">
         <div class = 'sidebar'>
             <factorBox/>
-            <el-button type="primary" @click="startCount" class="button">Start</el-button>
-            <el-button type="primary" @click="stopCount" class="button">Stop</el-button>
-            <el-button type="primary" @click="refreshCount" class="button">Refresh</el-button>
-            <p>timestep:{{ currentTime-1 }}</p>
+            <div>
+                <el-button type="primary" @click="startCount" class="button" v-show = '!iscounting'>Start</el-button>
+                <el-button type="primary" @click="stopCount" class="button" v-show = 'iscounting'>Stop</el-button>
+                <el-button type="primary" @click="refreshCount" class="button">Reset</el-button>
+                <p>timestep:{{ currentTime-1 }}</p>
+            </div>
         </div>
         <div id="mapid">
             <carLegend />
@@ -124,6 +130,11 @@ function refreshCount() {
     flex-direction: column;
     padding-left: 10px;
     margin-left: -15px;
+    div{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
     .button {
         width: 150px;
         margin: 10px;
