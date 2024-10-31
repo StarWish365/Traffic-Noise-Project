@@ -21,7 +21,7 @@ const chartCanvas = ref(null); // 获取 Canvas 的引用
 // 初始化空数据
 const emptyData = {
   laeq: [],
-  timestepStart: 20001, // 横坐标起始值 (timestep)
+  timestepStart: 500, // 横坐标起始值 (timestep)
 };
 
 // 初始化图表函数

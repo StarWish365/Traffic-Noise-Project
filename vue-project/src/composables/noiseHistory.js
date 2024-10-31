@@ -1,6 +1,6 @@
 import request from '../utils/request'
 import mapboxgl from 'mapbox-gl';
-export function getNoiseHistory(lng, lat, time, map, HeadValue) {
+export function getNoiseHistory(lng, lat, time, map, HeadValue, marker) {
     // 创建请求体数据
     const params = {
         longitude: lng,
@@ -8,8 +8,7 @@ export function getNoiseHistory(lng, lat, time, map, HeadValue) {
         time: time
     };
 
-    // 使用 Axios 请求后端接口
-    request.get('get_noise_value', { params })
+    return request.get('get_noise_value', { params })
         .then((response) => {
             console.log('服务器返回的数据:', response.data)
             // 处理返回的数据，例如更新地图上的图层或显示数据
@@ -18,14 +17,15 @@ export function getNoiseHistory(lng, lat, time, map, HeadValue) {
             const idreceiver = response.data[0].result.properties.idreceiver
             HeadValue.idreceiver = idreceiver
             HeadValue.history = noiseHistory
+            HeadValue.receiverCoordinates = coordinates
             console.log("噪声点坐标", coordinates)
             // 如果上一次的 marker 存在，先将其移除
-            if (HeadValue.marker) {
-                HeadValue.marker.remove();
+            if (marker.value) {
+                marker.value.remove();
             }
             // 创建新的 marker 并添加到地图
-            HeadValue.marker = new mapboxgl.Marker()
-                .setLngLat(coordinates)
+            marker.value = new mapboxgl.Marker()
+                .setLngLat(HeadValue.receiverCoordinates)
                 .addTo(map.value);
         })
         .catch((error) => {

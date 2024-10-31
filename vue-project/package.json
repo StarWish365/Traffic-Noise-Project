@@ -10,6 +10,8 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
   },
   "dependencies": {
+    "@heroicons/vue": "^2.1.5",
+    "@mapbox/mapbox-gl-geocoder": "^5.0.3",
     "@turf/turf": "^7.1.0",
     "axios": "^1.7.7",
     "chart.js": "^4.4.4",
@@ -17,6 +19,7 @@
     "interpolateheatmaplayer": "^1.5.0",
     "leaflet-feature-legend": "^1.0.0",
     "mapbox-gl": "^3.6.0",
+    "mapbox-gl-animated-popup": "^0.4.0",
     "pinia": "^2.1.7",
     "turf": "^3.0.14",
     "vue": "^3.4.29"

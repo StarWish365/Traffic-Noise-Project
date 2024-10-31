@@ -8,19 +8,19 @@ export const useValueStore = defineStore('HeadValue', () => {
   const selected = ref(null)
   const history = ref([])
   const idreceiver = ref(null)
-  const marker = ref(null);
   const FramebufferFactor = ref(0.3)
+  const receiverCoordinates = ref(null)
 
   // 定义 action 函数
   const addHistoryEntry = (entry) => {
-    history.value=[...history.value,entry];  // 使用 actions 来修改数组
+    history.value = [...history.value, entry];  // 使用 actions 来修改数组
   }
   const resetHistory = () => {
-    history.value=[]
-    idreceiver.value=null
+    history.value = []
+    idreceiver.value = null
   }
 
 
   // 返回状态和 action
-  return { heatP,  sel,  map_data, selected, history, idreceiver, marker,FramebufferFactor,addHistoryEntry,resetHistory }
+  return { heatP, sel, map_data, selected, history, idreceiver, FramebufferFactor, receiverCoordinates, addHistoryEntry, resetHistory }
 })

@@ -71,7 +71,7 @@ export function load_cars(time, map, sel) {
             const carsSource = map.value.getSource('cars');
             console.log("Cars Source Data:", carsSource._data);
             mouseEvent(map)
-            handlerPopup(map)
+            /* handlerPopup(map) */
 
         } else {
             // create the animation

@@ -15,17 +15,16 @@ export function load_noice(time, map, heatP, framebufferFactor) {
                 layerId: 'noise',
                 p: heatP,
                 pointRadius: 100,
-                framebufferFactor: framebufferFactor
+                framebufferFactor: framebufferFactor,
             });
             map.value.addLayer(layer);
-            //console.log('Noise layer added:', layer);
         } else {
             const layer = interpolateHeatmapLayer({
                 points: noise,
                 layerId: 'noise',
                 p: heatP,
                 pointRadius: 100,
-                framebufferFactor: framebufferFactor
+                framebufferFactor: framebufferFactor,
             });
             map.value.removeLayer('noise');
             map.value.addLayer(layer, 'cars-layer');
