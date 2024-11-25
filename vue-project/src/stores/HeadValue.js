@@ -8,7 +8,7 @@ export const useValueStore = defineStore('HeadValue', () => {
   const selected = ref(null)
   const history = ref([])
   const idreceiver = ref(null)
-  const FramebufferFactor = ref(0.3)
+  const FramebufferFactor = ref(0.2)
   const receiverCoordinates = ref(null)
 
   // 定义 action 函数

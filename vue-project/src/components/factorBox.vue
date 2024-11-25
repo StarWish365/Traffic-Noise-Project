@@ -12,7 +12,7 @@ import 'element-plus/theme-chalk/el-tooltip.css';
 
 <template>
     
-    <h4>Heatmap Factor</h4>
+    <h3>Heatmap Factor</h3>
 
     <div class = "factor-container">
         <el-tooltip placement="top-start">

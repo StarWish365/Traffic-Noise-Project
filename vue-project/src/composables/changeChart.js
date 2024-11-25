@@ -10,7 +10,7 @@ export function getNextNoise(idreceiver, time, HeadValue) {
     request.get('get_next_noise', { params })
         .then((response) => {
             const laeq = Number(response.data.rows[0].laeq)
-            console.log('服务器返回的数据:', laeq)
+            //console.log('服务器返回的数据:', laeq)
             HeadValue.addHistoryEntry(laeq);
             // 处理返回的数据，例如更新地图上的图层或显示数据
         })

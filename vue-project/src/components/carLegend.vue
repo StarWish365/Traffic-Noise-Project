@@ -7,7 +7,6 @@
   <div><span style="background-color: #00ff00;"></span> < 20km/h</div>
   <div><span style="background-color: #ffa500;"></span> 20km-40km/h</div>
   <div><span style="background-color: #ff0000;"></span> >40km/h</div>
-  <div><span style="background-color: #1938a4;"></span> ecar</div>
 </div>
 </template>
 

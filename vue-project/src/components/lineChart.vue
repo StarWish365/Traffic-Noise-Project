@@ -1,4 +1,5 @@
 <template>
+  <h3>Noise History</h3>
   <div>
     <canvas ref="chartCanvas"></canvas>
   </div>
@@ -50,6 +51,27 @@ const initChart = (laeqData = emptyData.laeq) => {
         responsive: true,
         animation: {
           duration: 0 // 禁用动画
+        },
+        scales:{
+          x:{
+            title:{
+              display:true,
+              text:'timestep'
+            },
+            ticks:{
+              display:false,
+              maxTicksLimit: 5 // 限制 X 轴刻度数量
+            }
+          },
+          y:{
+            title:{
+              display:true,
+              text:'laeq'
+            },
+            ticks:{
+              display:true
+            }
+          }
         }
       }
     });
@@ -63,23 +85,6 @@ const updateChart = (laeqData) => {
   }
   initChart(laeqData); // 使用新数据重新创建图表
 };
-// 重新更新图表
-/* const updateChart = (laeqData) => {
-  if (chartInstance.value) {
-    // 更新图表的数据
-    const timesteps = Array.from(
-      { length: laeqData.length },
-      (_, i) => emptyData.timestepStart + i // 生成新的time数据
-    );
-    // 更新图表的 labels 和 data
-    chartInstance.value.data.labels = timesteps; // 更新横坐标（time）
-    chartInstance.value.data.datasets[0].data = laeqData; // 更新纵坐标（laeq）
-    console.log(chartInstance.value.data.labels,chartInstance.value.data.datasets[0].data)
-  }
-  if (chartInstance.value) {
-      chartInstance.value.update(); // 仅更新图表而不销毁
-    }
-}; */
 
 
 // 监听 `HeadValue.history` 数据的变化
@@ -111,6 +116,9 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+h3{
+  text-align: center;
+}
 canvas {
   max-width: 100%;
   height: auto;

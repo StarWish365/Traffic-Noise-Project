@@ -1,5 +1,6 @@
 import request from '../utils/request'
 import { create as interpolateHeatmapLayer } from 'interpolateheatmaplayer'
+import { createGeoJSON } from './createGeoJSON'
 
 export function load_noice(time, map, heatP, framebufferFactor) {
     request.get('get_noice_time?time=' + time).then(res => {
@@ -8,6 +9,23 @@ export function load_noice(time, map, heatP, framebufferFactor) {
             lon: feature.geometry.coordinates[0],
             val: feature.properties.laeq
         }))
+        if (!map.value.getSource('receivers')) {
+            const geojsonData = createGeoJSON(res.data);
+            map.value.addSource('receivers', {
+                'type': 'geojson',
+                'data': geojsonData
+            })
+            map.value.addLayer({
+                'id': 'noise-receivers',
+                'type': 'circle',
+                'source': 'receivers',
+                'paint': {
+                    'circle-radius': 3,
+                    'circle-color': '#292c34'
+                }
+            })
+            map.value.setLayoutProperty('noise-receivers', 'visibility', 'none');
+        }
         //console.log(noise)
         if (!map.value.getLayer('noise')) {
             const layer = interpolateHeatmapLayer({

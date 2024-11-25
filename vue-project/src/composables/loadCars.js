@@ -1,5 +1,6 @@
 import mapboxgl from 'mapbox-gl';
 import request from '../utils/request'
+import { createGeoJSON } from './createGeoJSON';
 
 let animationDuration = 1000; // animation duration in milliseconds
 let previousPositions = {}; // store previous positions
@@ -20,7 +21,7 @@ export function load_cars(time, map, sel) {
                 'type': 'geojson',
                 'data': geojsonData
             });
-            console.log(geojsonData);
+            //console.log(geojsonData);
             if (sel === "Speed") {
                 map.value.addLayer({
                     'id': 'cars-layer',
@@ -111,19 +112,6 @@ function handlerPopup(map) {
         popup.setLngLat(coordinates).setHTML(description).addTo(map.value)
     })
 }
-
-// create Geojson
-function createGeoJSON(data) {
-    return {
-        "type": "FeatureCollection",
-        "features": data[0].row_to_json.features.map(feature => ({
-            "type": "Feature",
-            "geometry": feature.geometry,
-            "properties": feature.properties
-        }))
-    };
-}
-
 
 // Linear interpolation function,
 function lerp(start, end, t) {

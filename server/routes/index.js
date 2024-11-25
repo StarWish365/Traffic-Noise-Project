@@ -62,7 +62,7 @@ router.get('/api/get_noise_value', (req, res) => {
   const time = req.query.time
   const lng = req.query.longitude
   const lat = req.query.latitude
-  console.log(time, lng, lat)
+  //console.log(time, lng, lat)
   const q = `WITH query_point AS (
   -- 创建给定坐标的点几何，确保设置为 EPSG:4326
   SELECT ST_SetSRID(ST_GeomFromText('POINT(${lng} ${lat})'), 4326) AS geom
