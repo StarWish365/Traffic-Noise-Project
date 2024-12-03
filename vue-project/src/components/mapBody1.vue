@@ -5,7 +5,7 @@ import { useValueStore } from '@/stores/HeadValue';
 import { getNoiseHistory } from '@/composables/noiseHistory';
 import AnimatedPopup from 'mapbox-gl-animated-popup';
 import carLegend from './carLegend.vue';
-import lineChart from './lineChart.vue';
+import lineChart from './lineChartNew.vue';
 import layerControl from './layerControl.vue';
 import { ElButton,ElDrawer} from 'element-plus';
 import 'mapbox-gl/dist/mapbox-gl.css'
@@ -95,14 +95,14 @@ onMounted(() => {
     const container = document.createElement('div');
     // 将 Vue 组件挂载到该节点
     createApp(lineChart).mount(container);
-    container.style.width = '400px';  // 设置宽度
+    container.style.width = '510px';  // 设置宽度
     container.style.height = '100%'; // 设置高度
     const { lng, lat } = e.lngLat; // 获取双击位置的经纬度
     console.log(`双击坐标: 经度 ${lng}, 纬度 ${lat}`);
     await getNoiseHistory(lng, lat,currentTime.value,map,HeadValue,marker)
     let popup = new AnimatedPopup({
         maxWidth: '600px',
-        offset: [-20, -50], 
+        offset: [-20, -30], 
         openingAnimation: {
             duration: 1000,
             easing: 'easeOutElastic',

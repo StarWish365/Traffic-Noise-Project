@@ -31,14 +31,14 @@ export function load_cars(time, map, sel) {
                         'circle-radius': [
                             'case',
                             //set the radius of the circle
-                            ['==', ['get', 'type'], 'veh_passenger_e'], 8,
+                            ['==', ['get', 'type'], 'veh_electrical'], 8,
                             ['==', ['get', 'type'], 'veh_passenger'], 6,
                             5
                         ],
                         'circle-color': [
                             'case',
                             //set icon for different speed and cars
-                            ['==', ['get', 'type'], 'veh_passenger_e'], '#1938a4',
+                            ['==', ['get', 'type'], 'veh_electrical'], '#1938a4',
                             ['all', ['==', ['get', 'type'], 'veh_passenger'], ['<', ['get', 'speed'], 5.55]], '#00ff00',
                             ['all', ['==', ['get', 'type'], 'veh_passenger'], ['<', ['get', 'speed'], 11.11]], '#ffa500',
                             ['all', ['==', ['get', 'type'], 'veh_passenger'], ['>=', ['get', 'speed'], 11.11]], '#ff0000',
@@ -54,7 +54,7 @@ export function load_cars(time, map, sel) {
                     'paint': {
                         'circle-radius': [
                             'case',
-                            ['==', ['get', 'type'], 'veh_passenger_e'], 8,
+                            ['==', ['get', 'type'], 'veh_electrical'], 8,
                             ['==', ['get', 'type'], 'veh_passenger'], 6,
                             5
                         ],
@@ -71,7 +71,7 @@ export function load_cars(time, map, sel) {
             map.value.moveLayer('cars-layer');
             const carsSource = map.value.getSource('cars');
             console.log("Cars Source Data:", carsSource._data);
-            mouseEvent(map)
+            /* mouseEvent(map) */
             /* handlerPopup(map) */
 
         } else {

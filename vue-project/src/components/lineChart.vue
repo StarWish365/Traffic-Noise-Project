@@ -1,7 +1,17 @@
 <template>
   <h3>Noise History</h3>
-  <div>
-    <canvas ref="chartCanvas"></canvas>
+  <div class="container">
+    <canvas ref="chartCanvas" class="linechart"></canvas>
+    <div class="factor-box">
+      <div class="noise-factor">
+        <span>max noise</span> <br/>
+        <span>{{ Math.max(...HeadValue.history) }}dB</span>
+      </div>
+      <div class="noise-factor">
+        <span>min noise</span> <br/>
+        <span>{{ Math.min(...HeadValue.history) }}dB</span>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -16,8 +26,10 @@ const HeadValue = useValueStore();
 // 注册必要的 Chart.js 组件
 Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale);
 
-const chartInstance = ref(null); // 保存 Chart.js 实例
+
 const chartCanvas = ref(null); // 获取 Canvas 的引用
+
+let chartInstance; // 声明 Chart.js 实例
 
 // 初始化空数据
 const emptyData = {
@@ -35,7 +47,7 @@ const initChart = (laeqData = emptyData.laeq) => {
     );
 
     // 创建 Chart.js 折线图
-    chartInstance.value = new Chart(ctx, {
+    chartInstance = new Chart(ctx, {
       type: 'line',
       data: {
         labels: timesteps, // 横坐标数据
@@ -50,7 +62,7 @@ const initChart = (laeqData = emptyData.laeq) => {
       options: {
         responsive: true,
         animation: {
-          duration: 0 // 禁用动画
+          duration: 0// 禁用动画
         },
         scales:{
           x:{
@@ -78,13 +90,17 @@ const initChart = (laeqData = emptyData.laeq) => {
   }
 };
 
-// 重新绘制图表
+
 const updateChart = (laeqData) => {
-  if (chartInstance.value) {
-    chartInstance.value.destroy(); // 销毁旧的图表实例
+  if (chartInstance) {
+    chartInstance.data.labels = Array.from(
+      { length: laeqData.length },
+      (_, i) => emptyData.timestepStart + i // 重新生成 timestep 数据
+    );
+    chartInstance.data.datasets[0].data = laeqData; // 重新设置 laeq 值
+    chartInstance.update(); // 重新绘制图表
   }
-  initChart(laeqData); // 使用新数据重新创建图表
-};
+}
 
 
 // 监听 `HeadValue.history` 数据的变化
@@ -109,18 +125,37 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
-  if (chartInstance.value) {
-    chartInstance.value.destroy();
+  if (chartInstance) {
+    chartInstance.destroy();
+    console.log("destroy chart")
   }
 });
 </script>
 
 <style scoped>
-h3{
+h3 {
   text-align: center;
 }
-canvas {
-  max-width: 100%;
-  height: auto;
+
+.container {
+  width: 510px; /* 固定宽度 */
+  height: 250px;
+  display: flex;
+  flex-wrap: nowrap; /* 避免子项换行 */
+  overflow: hidden; /* 防止子项溢出 */
 }
+
+.linechart{
+  max-width: 400px;
+  height: 250px;
+}
+.factor-box {
+  flex: 0 0 100px; /* 固定宽度 */
+  background-color: pink;
+  margin-left: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 </style>
