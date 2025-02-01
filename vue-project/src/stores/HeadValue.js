@@ -2,7 +2,7 @@ import { ref } from 'vue'
 import { defineStore } from 'pinia'
 
 export const useValueStore = defineStore('HeadValue', () => {
-  const heatP = ref(3)
+  const heatP = ref(5)
   const sel = ref('Speed')
   const map_data = ref(null)
   const selected = ref(null)
@@ -10,6 +10,8 @@ export const useValueStore = defineStore('HeadValue', () => {
   const idreceiver = ref(null)
   const FramebufferFactor = ref(0.2)
   const receiverCoordinates = ref(null)
+  const heatLayercontrol = ref(true)
+  const vehicleLocation = ref(null)
 
   // 定义 action 函数
   const addHistoryEntry = (entry) => {
@@ -21,6 +23,7 @@ export const useValueStore = defineStore('HeadValue', () => {
   }
 
 
+
   // 返回状态和 action
-  return { heatP, sel, map_data, selected, history, idreceiver, FramebufferFactor, receiverCoordinates, addHistoryEntry, resetHistory }
+  return { heatP, sel, map_data, selected, history, idreceiver, FramebufferFactor, receiverCoordinates, heatLayercontrol,vehicleLocation, addHistoryEntry, resetHistory }
 })

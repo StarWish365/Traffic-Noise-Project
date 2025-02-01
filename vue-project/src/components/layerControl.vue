@@ -12,15 +12,23 @@
       >
         {{ layer.name }}
       </el-checkbox>
+      <el-checkbox class = 'layer-checkbox' v-model="HeadValue.heatLayercontrol" @change="controlHeatmap">
+        Heatmap Layer
+      </el-checkbox>
     </div>
   </template>
   
   <script setup>
   import { inject, reactive, watchEffect } from 'vue';
-  import { ElCheckbox } from 'element-plus';
+  import { ElCheckbox} from 'element-plus';
   import 'element-plus/es/components/checkbox/style/css';
-  
+  import { useValueStore } from '@/stores/HeadValue';
+  import { load_noice } from '@/composables/loadNoise';
+  const HeadValue = useValueStore()
+
+
   const map = inject('map');
+  const currentTime = inject('currentTime');
   const layers = reactive([
     { id: 'add-3d-buildings', name: 'Building', visible: true , avaliable: true},
     { id: 'noise-receivers', name: 'Receivers', visible: false, avaliable: false },
@@ -34,6 +42,9 @@
         layer.avaliable = true
       }else{
         layer.avaliable = false;
+        if(layer.id=='noise-receivers'){
+          layer.visible = false
+        }
       }
     });
   });
@@ -44,6 +55,11 @@
       const visibility = isVisible ? 'visible' : 'none';
       map.value.setLayoutProperty(layerId, 'visibility', visibility);
     }
+  }
+
+  const controlHeatmap = ()=>{
+    if(map.value.getLayer('noise') && !HeadValue.heatLayercontrol) map.value.removeLayer('noise');
+    if(!map.value.getLayer('noise') && HeadValue.heatLayercontrol) load_noice(currentTime.value,map,HeadValue.heatP,HeadValue.FramebufferFactor)
   }
   </script>
   
@@ -58,5 +74,6 @@
   .layer-checkbox {
     width: 100px;
   }
+
   </style>
   

@@ -1,13 +1,13 @@
 <script setup>
 import mapHeader from "./components/mapHeader.vue"
 import mapFooter from "./components/mapFooter.vue"
-import mapBody1 from "./components/mapBody1.vue"
+import mapBody from "./components/mapBody.vue"
 </script>
 
 <template>
   <div>
     <mapHeader></mapHeader>
-    <mapBody1></mapBody1>
+    <mapBody></mapBody>
     <mapFooter></mapFooter>
   </div>
 </template>

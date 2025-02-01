@@ -5,7 +5,7 @@ import { createGeoJSON } from './createGeoJSON';
 let animationDuration = 1000; // animation duration in milliseconds
 let previousPositions = {}; // store previous positions
 
-export function load_cars(time, map, sel) {
+export function load_cars(time, map, sel, store) {
     request.get('get_cars_time?time=' + time).then(response => {
         // create the dictionary for the current position
         const newPositions = response.data[0].row_to_json.features.reduce((acc, feature) => {
@@ -14,6 +14,8 @@ export function load_cars(time, map, sel) {
             acc[id] = coordinates;
             return acc;
         }, {});
+        /* console.log('车辆数据:', newPositions); */
+        store.vehicleLocation = newPositions
         // if it's the first time we've loaded car layer
         if (!map.value.getSource('cars')) {
             const geojsonData = createGeoJSON(response.data);
@@ -158,7 +160,6 @@ function animateCarMovement(newPositions, previousPositions, data, map) {
 
         // 打印结果，确认数据
         //console.log("interpolatedData:", interpolatedData);
-        //console.log("interpolatedData:",interpolatedData);
         // 更新地图上的车辆位置
         map.value.getSource('cars').setData({
             "type": "FeatureCollection",

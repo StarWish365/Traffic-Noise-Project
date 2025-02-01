@@ -8,3 +8,19 @@ export function createGeoJSON(data) {
         }))
     };
 }
+
+export function convertToGeoJSON(noisePoints) {
+    return {
+        "type": "FeatureCollection",
+        "features": noisePoints.map(point => ({
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [point.lon, point.lat] // 经度在前，纬度在后
+            },
+            "properties": {
+                "val": point.val // 噪声值
+            }
+        }))
+    };
+}

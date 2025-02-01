@@ -20,7 +20,7 @@ FROM (
         SELECT 'Feature' As type,
                ST_AsGeoJSON(ST_Transform(lg.geom, 4326))::json As geometry,  -- 转换为WGS84坐标系
                row_to_json((SELECT l FROM (SELECT idreceive, timestep, laeq) As l)) As properties
-        FROM laeq_data As lg
+        FROM laeq_data_filtered As lg
         WHERE timestep = ${time}
     ) As f
 ) As fc;
@@ -126,7 +126,7 @@ router.get('/api/get_next_noise', (req, res) => {
   var idreceiver = req.query.idreceiver;
   let q = `SELECT laeq from laeq_data where idreceive = ${idreceiver} and timestep = ${time}`
   pool.query(q, (err, dbResponse) => {
-    if (err) console.log(err); 
+    if (err) console.log(err);
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.send(dbResponse);
   }

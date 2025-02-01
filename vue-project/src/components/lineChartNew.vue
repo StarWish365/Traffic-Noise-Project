@@ -3,7 +3,6 @@ import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
 import * as echarts from 'echarts';
 import { useValueStore } from '@/stores/HeadValue';
 
-// 使用 Pinia store
 const HeadValue = useValueStore();
 
 const chartRef = ref(null); // 获取 DOM 容器引用
@@ -84,8 +83,8 @@ const initChart = (laeqData = emptyData.laeq) => {
             type: 'slider', // 滑动条
             show: true,
             xAxisIndex: 0, // 针对 x 轴
-            start: 0, // 初始位置的起始百分比
-            end: 100, // 初始位置的结束百分比
+            start: 0, 
+            end: 100, 
             },
             {
             type: 'inside', // 内置缩放（鼠标滚轮等方式控制）

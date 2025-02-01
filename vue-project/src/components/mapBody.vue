@@ -47,7 +47,6 @@ onMounted(() => {
             const labelLayerId = layers.find(
                 (layer) => layer.type === 'symbol' && layer.layout['text-field']
             ).id;
-
             // The 'building' layer in the Mapbox Streets
             // vector tileset contains building height data
             // from OpenStreetMap.
