@@ -1,15 +1,12 @@
 <script setup>
-import mapHeader from "./components/mapHeader.vue"
-import mapFooter from "./components/mapFooter.vue"
-import mapBody from "./components/mapBody.vue"
+import mapHeader from './components/mapHeader.vue';
+import mapFooter from './components/mapFooter.vue';
 </script>
 
 <template>
-  <div>
-    <mapHeader></mapHeader>
-    <mapBody></mapBody>
-    <mapFooter></mapFooter>
-  </div>
+  <mapHeader></mapHeader>
+  <router-view></router-view>
+  <mapFooter></mapFooter>
 </template>
 
 <style scoped></style>

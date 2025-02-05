@@ -15,6 +15,9 @@
       <el-checkbox class = 'layer-checkbox' v-model="HeadValue.heatLayercontrol" @change="controlHeatmap">
         Heatmap Layer
       </el-checkbox>
+      <router-link :to="{name:'data'}">
+        set data
+      </router-link>
     </div>
   </template>
   
@@ -58,8 +61,12 @@
   }
 
   const controlHeatmap = ()=>{
-    if(map.value.getLayer('noise') && !HeadValue.heatLayercontrol) map.value.removeLayer('noise');
-    if(!map.value.getLayer('noise') && HeadValue.heatLayercontrol) load_noice(currentTime.value,map,HeadValue.heatP,HeadValue.FramebufferFactor)
+    if(map.value.getLayer('noise') && !HeadValue.heatLayercontrol){
+      map.value.removeLayer('noise');
+      map.value.removeLayer('noise-receivers');
+      map.value.removeSource('receivers');
+    } 
+    if(!map.value.getLayer('noise') && HeadValue.heatLayercontrol) load_noice(currentTime.value,map,HeadValue)
   }
   </script>
   

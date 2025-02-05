@@ -3,7 +3,9 @@
 
 <template>
     <div class="header">
-        <h2><span class="headerc">Traffic Noise Explorer</span></h2>
+        <RouterLink :to="{name:'main'}">
+            Traffic Noise Explorer
+        </RouterLink>
     </div>
 </template>
 
@@ -13,5 +15,19 @@
     color: #fff;
     padding: 10px;
     text-align: center;
+    text-decoration: none;
+   }
+   a {
+    display: inline-block;;
+    color: #fff;
+    text-decoration: none;
+    font-size: 35px;
+    font-weight: bold;
+    margin: 5px;
+    padding: 5px;
+    transition: .5s;
+   }
+   a:hover{
+    color: #23e4ca;
    }
 </style>

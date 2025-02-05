@@ -24,6 +24,23 @@ app.use(compression({
   }
 }));
 
+/* const pool = require('./database/db'); // 确保路径正确
+
+function runScheduledQuery() {
+  let query = `INSERT INTO test_table DEFAULT VALUES;`;
+
+  pool.query(query, (err, result) => {
+    if (err) {
+      console.error('SQL 执行失败:', err);
+    } else {
+      console.log('每秒执行 SQL 成功');
+    }
+  });
+}
+// 每秒执行一次
+setInterval(runScheduledQuery, 2000); */
+
+
 // 自定义压缩条件
 function shouldCompress(req, res) {
   // 自定义不压缩逻辑，例如如果响应是图像，则不进行压缩

@@ -4,15 +4,15 @@ import mapboxgl from'mapbox-gl';
 import { useValueStore } from '@/stores/HeadValue';
 import { getNoiseHistory } from '@/composables/noiseHistory';
 import AnimatedPopup from 'mapbox-gl-animated-popup';
-import carLegend from './carLegend.vue';
-import lineChart from './lineChartNew.vue';
-import layerControl from './layerControl.vue';
+import carLegend from '@/components/carLegend.vue';
+import lineChart from '@/components/lineChartNew.vue';
+import layerControl from '@/components/layerControl.vue';
 import { ElButton,ElDrawer} from 'element-plus';
 import 'mapbox-gl/dist/mapbox-gl.css'
 import 'element-plus/es/components/button/style/css';
 import 'element-plus/es/components/drawer/style/css';
-import factorBox from './factorBox.vue';
-import controlBox from './controlBox.vue';
+import factorBox from '@/components/factorBox.vue';
+import controlBox from '@//components/controlBox.vue';
 
 
 const HeadValue = useValueStore()
@@ -34,6 +34,7 @@ onMounted(() => {
         projection: 'mercator'
     });
     map.value.doubleClickZoom.disable();
+    map.value.addControl(new mapboxgl.ScaleControl(),'top-right');
    //添加控件
    map.value.on('load', () => {
       // 地图控件

@@ -14,7 +14,6 @@ export function load_noice(time, map, store) {
         const noise = filterNoisePoints(rawNoise)
         const geojsonData = convertToGeoJSON(noise)
         if (!map.value.getSource('receivers')) {
-            /*             const geojsonData = createGeoJSON(res.data); */
             console.log(geojsonData)
             map.value.addSource('receivers', {
                 'type': 'geojson',

@@ -63,7 +63,7 @@ function refreshCount() {
 </script>
 
 <template>
-    <div class="controlButton">
+    <div class="controlBox">
         <el-button @click="startCount" v-if = '!iscounting' class="button"  circle>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="32" height="32">
             <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
@@ -84,7 +84,7 @@ function refreshCount() {
 </template>
 
 <style scoped>
-.controlButton {
+.controlBox {
     position: absolute;
     display: flex;
     flex-direction: column;
@@ -99,14 +99,14 @@ function refreshCount() {
     box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15); 
 }
 
-.controlButton .button {
+.controlBox .button {
     width: 50px;
     height: 50px;
     font-size: 14px;
     margin: 10px;
 }
 
-.controlButton p {
+.controlBox p {
     font-size: 16px;
     color: #333;
     margin: 5px 0 0; /* 调整文字的上边距 */

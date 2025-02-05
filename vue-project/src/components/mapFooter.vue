@@ -63,7 +63,7 @@
   
   .row {
     grid-column: 1 / 5;
-    padding: 5px;
+    padding: 3px;
     font-family: 'Noto Serif'
   }
 </style>
