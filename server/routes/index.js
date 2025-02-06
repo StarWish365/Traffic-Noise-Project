@@ -133,6 +133,51 @@ router.get('/api/get_next_noise', (req, res) => {
   );
 });
 
+router.get('/api/get_building_id', (req, res) => {
+  const polygon = req.query.polygon;
+
+  if (!polygon) {
+    return res.status(400).json({ error: "缺少 polygon 参数" });
+  }
+
+  let query = `SELECT id
+  FROM buildings_data
+  WHERE ST_Intersects(
+      geom,
+      ST_Transform(
+          ST_GeomFromText('POLYGON(${polygon})', 4326),  
+      32633)  
+  );`;
+
+  pool.query(query, (err, dbResponse) => {
+    if (err) {
+      console.log(err);
+      res.status(500).json({ error: "数据库查询失败" });
+      return;
+    }
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.json(dbResponse.rows);
+  });
+});
+
+router.get('/api/get_receivers_to_building', (req, res) => {
+  let query = `
+    SELECT idreceive, bg_pk, pop 
+    FROM selected_receivers;
+  `;
+
+  pool.query(query, (err, dbResponse) => {
+    if (err) {
+      console.error("数据库查询失败:", err);
+      return res.status(500).json({ error: "数据库查询失败" });
+    }
+
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.json(dbResponse.rows);
+  });
+});
+
+
 
 
 module.exports = router;

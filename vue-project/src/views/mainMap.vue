@@ -3,6 +3,8 @@ import { onMounted ,ref ,createApp,provide} from 'vue';
 import mapboxgl from'mapbox-gl';
 import { useValueStore } from '@/stores/HeadValue';
 import { getNoiseHistory } from '@/composables/noiseHistory';
+import { getBuildingId} from '@/composables/getBuildingId';
+import { getReceiverstoBuilding } from '@/composables/getReceiverstoBuilding';
 import AnimatedPopup from 'mapbox-gl-animated-popup';
 import carLegend from '@/components/carLegend.vue';
 import lineChart from '@/components/lineChartNew.vue';
@@ -60,7 +62,12 @@ onMounted(() => {
                     'type': 'fill-extrusion',
                     'minzoom': 15,
                     'paint': {
-                        'fill-extrusion-color': '#aaa',
+                        'fill-extrusion-color': [
+                            'case',
+                            ['boolean', ['feature-state', 'hover'], false], // 检查 feature-state: hover 是否为 true
+                            '#ff6600', // 悬停时的颜色（橙色）
+                            '#aaa' // 默认颜色
+                        ],
 
                         // Use an 'interpolate' expression to
                         // add a smooth transition effect to
@@ -89,6 +96,51 @@ onMounted(() => {
                 labelLayerId
             );
         });
+        let hoveredBuildingId = null;
+
+
+    // 监听鼠标移动事件
+        map.value.on('mousemove', 'add-3d-buildings', (e) => {
+            if (e.features.length > 0) {
+                const buildingId = e.features[0].id;
+                map.value.getCanvas().style.cursor = 'pointer';
+
+                if (hoveredBuildingId !== null && hoveredBuildingId !== buildingId) {
+                    map.value.setFeatureState(
+                        { source: 'composite', sourceLayer: 'building', id: hoveredBuildingId },
+                        { hover: false }
+                    );
+                }
+
+                hoveredBuildingId = buildingId;
+
+                map.value.setFeatureState(
+                    { source: 'composite', sourceLayer: 'building', id: hoveredBuildingId },
+                    { hover: true }
+                );
+            }
+        });
+
+        // 监听点击事件
+        map.value.on('click', 'add-3d-buildings', async(e) => {
+            /* console.log(e.features[0]); */
+            const polygon = e.features[0].geometry.coordinates
+            const buildingId = await getBuildingId(polygon)
+            console.log(buildingId.data[0].id);
+        })
+
+        // 监听鼠标离开事件
+        map.value.on('mouseleave', 'add-3d-buildings', () => {
+            if (hoveredBuildingId !== null) {
+                map.value.setFeatureState(
+                    { source: 'composite', sourceLayer: 'building', id: hoveredBuildingId },
+                    { hover: false }
+                );
+            }
+            hoveredBuildingId = null;
+            map.value.getCanvas().style.cursor = '';
+        });
+
 
     map.value.on('dblclick',async (e) => {
     // 创建一个空的 DOM 节点
@@ -116,6 +168,7 @@ onMounted(() => {
     }).setDOMContent(container)
     marker.value.setPopup(popup)
     });
+    getReceiverstoBuilding()
 });
 let currentTime = ref(500)
 const table = ref(false) //set for Drawbox

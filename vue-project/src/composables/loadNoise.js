@@ -8,13 +8,14 @@ export function load_noice(time, map, store) {
         const rawNoise = res.data[0].row_to_json.features.map(feature => ({
             lat: feature.geometry.coordinates[1],
             lon: feature.geometry.coordinates[0],
+            id: feature.properties.id,
             val: feature.properties.laeq
         }))
         updateVehicleIndex(store.vehicleLocation)
         const noise = filterNoisePoints(rawNoise)
         const geojsonData = convertToGeoJSON(noise)
         if (!map.value.getSource('receivers')) {
-            console.log(geojsonData)
+            /* console.log(geojsonData) */
             map.value.addSource('receivers', {
                 'type': 'geojson',
                 'data': geojsonData
