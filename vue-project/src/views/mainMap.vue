@@ -5,6 +5,8 @@ import { useValueStore } from '@/stores/HeadValue';
 import { getNoiseHistory } from '@/composables/noiseHistory';
 import { getBuildingId} from '@/composables/getBuildingId';
 import { getReceiverstoBuilding } from '@/composables/getReceiverstoBuilding';
+import { analyzeOverNoise } from '@/composables/analyseOvernoise';
+import { loadBuildings } from '@/composables/loadBuildings';
 import AnimatedPopup from 'mapbox-gl-animated-popup';
 import carLegend from '@/components/carLegend.vue';
 import lineChart from '@/components/lineChartNew.vue';
@@ -97,7 +99,7 @@ onMounted(() => {
             );
         });
         let hoveredBuildingId = null;
-
+    
 
     // 监听鼠标移动事件
         map.value.on('mousemove', 'add-3d-buildings', (e) => {
@@ -125,8 +127,10 @@ onMounted(() => {
         map.value.on('click', 'add-3d-buildings', async(e) => {
             /* console.log(e.features[0]); */
             const polygon = e.features[0].geometry.coordinates
-            const buildingId = await getBuildingId(polygon)
-            console.log(buildingId.data[0].id);
+            const building = await getBuildingId(polygon)
+            const buildingID =`building${building.data[0].pk}`
+            const ans = analyzeOverNoise(HeadValue.receiverstoBuilding[buildingID])
+            console.log(ans)
         })
 
         // 监听鼠标离开事件
@@ -140,7 +144,32 @@ onMounted(() => {
             hoveredBuildingId = null;
             map.value.getCanvas().style.cursor = '';
         });
+    //添加建筑图层（自定义）
+        map.value.on('load',async function () {
+    // 添加数据源
+    const buildingData = await loadBuildings()
+    const geojsondata = buildingData.data[0].geojson.features
+/*     console.log(geojsondata) */
+    map.value.addSource('buildings', {
+        'type': 'geojson',
+        'data': {
+            "type": "FeatureCollection",
+            "features": geojsondata
+        }
+    });
 
+    // 添加填充图层
+    map.value.addLayer({
+        'id': 'buildings-fill',
+        'type': 'fill',
+        'source': 'buildings',
+        'minzoom': 15,
+        'paint': {
+            'fill-color': ['get', 'color'], // 从 properties 读取颜色
+            'fill-opacity': 0.6
+        }
+    });
+});
 
     map.value.on('dblclick',async (e) => {
     // 创建一个空的 DOM 节点
@@ -168,7 +197,8 @@ onMounted(() => {
     }).setDOMContent(container)
     marker.value.setPopup(popup)
     });
-    getReceiverstoBuilding()
+    getReceiverstoBuilding(HeadValue)
+    loadBuildings()
 });
 let currentTime = ref(500)
 const table = ref(false) //set for Drawbox

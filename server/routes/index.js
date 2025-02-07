@@ -19,7 +19,7 @@ FROM (
     FROM (
         SELECT 'Feature' As type,
                ST_AsGeoJSON(ST_Transform(lg.geom, 4326))::json As geometry,  -- 转换为WGS84坐标系
-               row_to_json((SELECT l FROM (SELECT idreceive, timestep, laeq) As l)) As properties
+               row_to_json((SELECT l FROM (SELECT idreceive, timestep, laeq, bg_pk) As l)) As properties
         FROM laeq_data_filtered As lg
         WHERE timestep = ${time}
     ) As f
@@ -140,7 +140,7 @@ router.get('/api/get_building_id', (req, res) => {
     return res.status(400).json({ error: "缺少 polygon 参数" });
   }
 
-  let query = `SELECT id
+  let query = `SELECT pk
   FROM buildings_data
   WHERE ST_Intersects(
       geom,
@@ -176,6 +176,34 @@ router.get('/api/get_receivers_to_building', (req, res) => {
     res.json(dbResponse.rows);
   });
 });
+
+router.get('/api/load_building', (req, res) => {
+  let query = `
+    SELECT json_build_object(
+    'type', 'FeatureCollection',
+    'features', json_agg(
+        json_build_object(
+            'type', 'Feature',
+            'id', pk,
+            'properties', json_build_object('color', '#7a7a7a'), -- 这里默认给个颜色
+            'geometry', ST_AsGeoJSON(ST_Transform(geom, 4326))::json
+        )
+    )
+) AS geojson
+FROM buildings_data;
+  `;
+
+  pool.query(query, (err, dbResponse) => {
+    if (err) {
+      console.error("数据库查询失败:", err);
+      return res.status(500).json({ error: "数据库查询失败" });
+    }
+
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.json(dbResponse.rows);
+  });
+});
+
 
 
 

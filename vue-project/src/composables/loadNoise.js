@@ -8,9 +8,11 @@ export function load_noice(time, map, store) {
         const rawNoise = res.data[0].row_to_json.features.map(feature => ({
             lat: feature.geometry.coordinates[1],
             lon: feature.geometry.coordinates[0],
-            id: feature.properties.id,
+            id: feature.properties.idreceive,
+            building: feature.properties.bg_pk,
             val: feature.properties.laeq
         }))
+        noiseCount(rawNoise, store)
         updateVehicleIndex(store.vehicleLocation)
         const noise = filterNoisePoints(rawNoise)
         const geojsonData = convertToGeoJSON(noise)
@@ -112,6 +114,29 @@ function filterNoisePoints(noisePoints) {
                 if (vehicles100m.length > 0) return Math.random() < 0.5; // 100m 内有车，50% 概率保留 */
 
         return false; // 超过 100m，直接丢弃
+    });
+}
+
+
+function noiseCount(noiseData, store) {
+    noiseData.forEach(({ building, id, val }) => {
+        if (val >= 65) {
+            /* const buildingID = `building${building}`
+            const buildingObj = store.receiverstoBuilding.get(buildingID);
+            if (buildingObj) {
+                const receiverID = `receiver${id}`;
+                const receiverObj = buildingObj.get(receiverID);
+                if (receiverObj) {
+                    receiverObj.overNoisecount++
+                }
+            } */
+            const buildingID = `building${building}`
+            const receiverID = `receiver${id}`;
+            if (store.receiverstoBuilding[buildingID].receivers[receiverID]) {
+                store.receiverstoBuilding[buildingID].receivers[receiverID].overNoisecount++
+                store.receiverstoBuilding[buildingID].sum += Number(store.receiverstoBuilding[buildingID].pop)
+            }
+        }
     });
 }
 
