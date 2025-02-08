@@ -130,7 +130,7 @@ onMounted(() => {
             const building = await getBuildingId(polygon)
             const buildingID =`building${building.data[0].pk}`
             const ans = analyzeOverNoise(HeadValue.receiverstoBuilding[buildingID])
-            console.log(ans)
+            console.log(buildingID,ans)
         })
 
         // 监听鼠标离开事件

@@ -12,7 +12,7 @@ export function load_noice(time, map, store) {
             building: feature.properties.bg_pk,
             val: feature.properties.laeq
         }))
-        noiseCount(rawNoise, store)
+        noiseCount(rawNoise, store, map)
         updateVehicleIndex(store.vehicleLocation)
         const noise = filterNoisePoints(rawNoise)
         const geojsonData = convertToGeoJSON(noise)
@@ -117,26 +117,37 @@ function filterNoisePoints(noisePoints) {
     });
 }
 
-
-function noiseCount(noiseData, store) {
+//每一轮计算每个building的人口噪声暴露程度
+function noiseCount(noiseData, store, map) {
     noiseData.forEach(({ building, id, val }) => {
         if (val >= 65) {
-            /* const buildingID = `building${building}`
-            const buildingObj = store.receiverstoBuilding.get(buildingID);
-            if (buildingObj) {
-                const receiverID = `receiver${id}`;
-                const receiverObj = buildingObj.get(receiverID);
-                if (receiverObj) {
-                    receiverObj.overNoisecount++
-                }
-            } */
             const buildingID = `building${building}`
             const receiverID = `receiver${id}`;
             if (store.receiverstoBuilding[buildingID].receivers[receiverID]) {
                 store.receiverstoBuilding[buildingID].receivers[receiverID].overNoisecount++
                 store.receiverstoBuilding[buildingID].sum += Number(store.receiverstoBuilding[buildingID].pop)
             }
+            if (store.receiverstoBuilding[buildingID].sum > 100) {
+                if (!store.receiverstoBuilding[buildingID].highlight) {
+                    store.receiverstoBuilding[buildingID].highlight = true
+                    updateBuildingColor(building, '#ffa500', map)
+                }
+            }
         }
     });
 }
+
+// 改变噪声暴露程度过高的building的颜色
+function updateBuildingColor(buildingId, newColor, map) {
+    let source = map.value.getSource('buildings');
+    if (!source) return;
+    let data = source._data; // 获取当前 GeoJSON 数据
+    let feature = data.features.find(f => f.id === buildingId); // 直接查找对应 Feature
+
+    if (feature) {
+        feature.properties.color = newColor; // 直接修改目标 Feature 的颜色
+        source.setData(data); // 仅更新一次数据
+    }
+}
+
 

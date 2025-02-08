@@ -54,6 +54,16 @@ function refreshCount() {
     if(map.value.getLayer('noise')) map.value.removeLayer('noise');
     if(map.value.getLayer('noise-receivers')) map.value.removeLayer('noise-receivers');
     if(map.value.getSource('receivers')) map.value.removeSource('receivers');
+
+    let source = map.value.getSource('buildings');
+    let data = source._data; // 获取当前 GeoJSON 数据
+    data.features = data.features.map(feature => {
+        feature.properties.color = '#aaa';
+        return feature;
+    });
+
+    source.setData(data); // 更新数据源
+
     HeadValue.resetHistory()
     if (marker.value) {
         marker.value.remove();
