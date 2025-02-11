@@ -101,7 +101,7 @@ onMounted(() => {
         let hoveredBuildingId = null;
     
 
-    // 监听鼠标移动事件
+        // 监听鼠标移动事件
         map.value.on('mousemove', 'add-3d-buildings', (e) => {
             if (e.features.length > 0) {
                 const buildingId = e.features[0].id;
@@ -127,10 +127,27 @@ onMounted(() => {
         map.value.on('click', 'add-3d-buildings', async(e) => {
             /* console.log(e.features[0]); */
             const polygon = e.features[0].geometry.coordinates
-            const building = await getBuildingId(polygon)
-            const buildingID =`building${building.data[0].pk}`
-            const ans = analyzeOverNoise(HeadValue.receiverstoBuilding[buildingID])
-            console.log(buildingID,ans)
+            const buildingID = await getBuildingId(polygon)
+            if(!buildingID || buildingID.length === 0) return
+            const buildingName =`building${buildingID}`
+            const ans = analyzeOverNoise(HeadValue.receiverstoBuilding[buildingName])
+            //设置建筑信息弹窗
+            new AnimatedPopup({
+                maxWidth: '600px',
+                offset: [-20, -30], 
+                openingAnimation: {
+                    duration: 1000,
+                    easing: 'easeOutElastic',
+                    transform: 'scale'
+                },
+                closingAnimation: {
+                    duration: 300,
+                    easing: 'easeInBack',
+                    transform: 'scale'
+                }
+            }).setLngLat(e.lngLat) // 设置 Popup 位置为点击的点
+                .setHTML(`<strong>${buildingName}</strong><br>${ans}`) // 显示内容
+                .addTo(map.value);
         })
 
         // 监听鼠标离开事件
@@ -146,29 +163,27 @@ onMounted(() => {
         });
     //添加建筑图层（自定义）
         map.value.on('load',async function () {
-    // 添加数据源
-    const buildingData = await loadBuildings()
-    const geojsondata = buildingData.data[0].geojson.features
-/*     console.log(geojsondata) */
-    map.value.addSource('buildings', {
-        'type': 'geojson',
-        'data': {
-            "type": "FeatureCollection",
-            "features": geojsondata
-        }
-    });
+        // 添加数据源
+        const geojsondata = await loadBuildings()
+        map.value.addSource('buildings', {
+            'type': 'geojson',
+            'data': {
+                "type": "FeatureCollection",
+                "features": geojsondata
+            }
+        });
 
-    // 添加填充图层
-    map.value.addLayer({
-        'id': 'buildings-fill',
-        'type': 'fill',
-        'source': 'buildings',
-        'minzoom': 15,
-        'paint': {
-            'fill-color': ['get', 'color'], // 从 properties 读取颜色
-            'fill-opacity': 0.6
-        }
-    });
+        // 添加填充图层
+        map.value.addLayer({
+            'id': 'buildings-fill',
+            'type': 'fill',
+            'source': 'buildings',
+            'minzoom': 15,
+            'paint': {
+                'fill-color': ['get', 'color'], // 从 properties 读取颜色
+                'fill-opacity': 0.6
+            }
+        });
 });
 
     map.value.on('dblclick',async (e) => {
@@ -198,7 +213,6 @@ onMounted(() => {
     marker.value.setPopup(popup)
     });
     getReceiverstoBuilding(HeadValue)
-    loadBuildings()
 });
 let currentTime = ref(500)
 const table = ref(false) //set for Drawbox

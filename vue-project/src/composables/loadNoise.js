@@ -36,7 +36,8 @@ export function load_noice(time, map, store) {
             map.value.getSource('receivers').setData(geojsonData)
         }
         //console.log(noise)
-        if (!map.value.getLayer('noise')) {
+        if(store.heatLayercontrol){
+            if (!map.value.getLayer('noise')) {
             const layer = interpolateHeatmapLayer({
                 points: noise,
                 layerId: 'noise',
@@ -45,17 +46,19 @@ export function load_noice(time, map, store) {
                 framebufferFactor: store.FramebufferFactor,
             });
             map.value.addLayer(layer);
-        } else {
-            const layer = interpolateHeatmapLayer({
-                points: noise,
-                layerId: 'noise',
-                p: store.heatP,
-                pointRadius: 100,
-                framebufferFactor: store.FramebufferFactor,
-            });
-            map.value.removeLayer('noise');
-            map.value.addLayer(layer, 'cars-layer');
+            } else {
+                const layer = interpolateHeatmapLayer({
+                    points: noise,
+                    layerId: 'noise',
+                    p: store.heatP,
+                    pointRadius: 100,
+                    framebufferFactor: store.FramebufferFactor,
+                });
+                map.value.removeLayer('noise');
+                map.value.addLayer(layer, 'cars-layer');
+            }
         }
+        
 
         //console.log("noisepoints:", noise)
     }).catch(error => {

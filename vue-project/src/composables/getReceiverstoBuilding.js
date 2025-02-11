@@ -10,11 +10,11 @@ export function getReceiverstoBuilding(store) {
                 result[buildingID] = {
                     highlight: false,  // 默认不高亮
                     pop: pop,          // 将 pop 移到 buildingID 层级
-                    sum:0,
+                    sum: 0,
                     receivers: {}      // 存储 receiver 数据
                 };
             }
-        
+
             // 添加 receiver 数据
             result[buildingID].receivers[receiverID] = {
                 'id': idreceive,
@@ -22,26 +22,7 @@ export function getReceiverstoBuilding(store) {
             };
         })
         store.receiverstoBuilding = result
-/*         const result = new Map();
 
-        res.data.forEach(({ idreceive, bg_pk, pop }) => {
-            const buildingID = `building${bg_pk}`;
-            const receiverID = `receiver${idreceive}`;
-
-            if (!result.has(buildingID)) {
-                result.set(buildingID, new Map());
-            }
-
-            result.get(buildingID).set(receiverID, {
-                id: idreceive,
-                pop: pop,
-                overNoisecount: 0
-            });
-        });
-
-        // 存储到 store
-        store.receiverstoBuilding = result; */
-
-        console.log(store.receiverstoBuilding)
+        /* console.log(store.receiverstoBuilding) */
     })
 }

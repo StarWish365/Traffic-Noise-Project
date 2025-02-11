@@ -26,5 +26,6 @@ export const useValueStore = defineStore('HeadValue', () => {
 
 
   // 返回状态和 action
-  return { heatP, sel, map_data, selected, history, idreceiver, FramebufferFactor, receiverCoordinates, heatLayercontrol,vehicleLocation, receiverstoBuilding, addHistoryEntry, resetHistory }
+  return { heatP, sel, map_data, selected, history, idreceiver, FramebufferFactor, receiverCoordinates,
+     heatLayercontrol,vehicleLocation, receiverstoBuilding, addHistoryEntry, resetHistory }
 })

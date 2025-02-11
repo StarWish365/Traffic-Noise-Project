@@ -12,6 +12,8 @@ export function getBuildingId(polygonData) {
 
     return request.get('get_building_id', {
         params: { polygon: polygon }
+    }).then((building) => {
+        return building.data[0].pk
     });
 }
 

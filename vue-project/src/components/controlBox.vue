@@ -5,6 +5,7 @@ import { load_cars } from '@/composables/loadCars';
 import { load_noice } from '@/composables/loadNoise';
 import { getNextNoise } from '@/composables/changeChart';
 import { useValueStore } from '@/stores/HeadValue';
+import { getReceiverstoBuilding } from '@/composables/getReceiverstoBuilding';
 const HeadValue = useValueStore();
 import 'element-plus/es/components/button/style/css';
 
@@ -19,9 +20,9 @@ let iscounting = ref(false);
 //console.log(map)
 function cars_move() {
     load_cars(currentTime.value,map,HeadValue.sel,HeadValue);
-    if(HeadValue.heatLayercontrol){
-        load_noice(currentTime.value,map,HeadValue)
-    }
+
+    load_noice(currentTime.value,map,HeadValue)
+
 
     if(HeadValue.idreceiver){
         getNextNoise(HeadValue.idreceiver,currentTime.value,HeadValue)
@@ -68,6 +69,8 @@ function refreshCount() {
     if (marker.value) {
         marker.value.remove();
     }
+    //重置ReceivertoBuilding映射
+    getReceiverstoBuilding(HeadValue)
 }
 
 </script>
