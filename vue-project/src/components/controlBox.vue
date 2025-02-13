@@ -23,7 +23,6 @@ function cars_move() {
 
     load_noice(currentTime.value,map,HeadValue)
 
-
     if(HeadValue.idreceiver){
         getNextNoise(HeadValue.idreceiver,currentTime.value,HeadValue)
     }

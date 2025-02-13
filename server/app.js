@@ -24,8 +24,10 @@ app.use(compression({
   }
 }));
 
-/* const pool = require('./database/db'); // 确保路径正确
+const { loadReceivers, processReceiversForTimestep } = require('./composables/index');
 
+
+/* const pool = require('./database/db');
 function runScheduledQuery() {
   let query = `INSERT INTO test_table DEFAULT VALUES;`;
 
@@ -51,6 +53,22 @@ function shouldCompress(req, res) {
   // 否则，使用 compression 中间件默认的压缩过滤规则
   return compression.filter(req, res);
 }
+let receivers
+app.post("/predict", async (req, res) => {
+  try {
+    let { timestep } = req.body;
+    if (timestep === undefined) {
+      return res.status(400).json({ error: "Missing timestep" });
+    }
+
+    let predictions = await processReceiversForTimestep(timestep,receivers);
+    res.json(predictions);
+    console.log('Success');
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
 app.use(function (req, res, next) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -67,4 +85,8 @@ app.use(function (req, res, next) {
   next(createError(404));
 });
 
-app.listen(3000, () => console.log('Server running on port 3000'));
+app.listen(3000, async () => {
+  console.log('Server running on port 3000')
+  receivers = await loadReceivers();
+  console.log('Receiver data loaded successfully')
+});
