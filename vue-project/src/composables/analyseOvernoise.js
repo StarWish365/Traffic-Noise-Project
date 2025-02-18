@@ -3,15 +3,19 @@ export function analyzeOverNoise(building) {
 
     let countOver20 = 0;
     let countOver10 = 0;
+    let countOver1 = 0
     const pop = building.pop
     Object.values(building.receivers).forEach(receiver => {
         if (receiver.overNoisecount > 20) {
             countOver20++;
         } else if (receiver.overNoisecount > 10) {
             countOver10++;
+        } else if (receiver.overNoisecount > 1) {
+            countOver1++
         }
     });
+    countOver1 = Math.floor(countOver1 * pop)
     countOver10 = Math.floor(countOver10 * pop)
     countOver20 = Math.floor(countOver20 * pop)
-    return `${countOver20} people have overNoisecount exceeding 20, ${countOver10} people have overNoisecount exceeding 10`;
+    return [countOver1, countOver10, countOver20]
 }

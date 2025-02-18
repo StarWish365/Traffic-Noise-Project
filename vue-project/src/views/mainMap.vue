@@ -10,6 +10,7 @@ import { loadBuildings } from '@/composables/loadBuildings';
 import AnimatedPopup from 'mapbox-gl-animated-popup';
 import carLegend from '@/components/carLegend.vue';
 import lineChart from '@/components/lineChartNew.vue';
+import barChart from '@/components/barChart.vue';
 import layerControl from '@/components/layerControl.vue';
 import { ElButton,ElDrawer} from 'element-plus';
 import 'mapbox-gl/dist/mapbox-gl.css'
@@ -132,6 +133,12 @@ onMounted(() => {
             const buildingName =`building${buildingID}`
             const ans = analyzeOverNoise(HeadValue.receiverstoBuilding[buildingName])
             //设置建筑信息弹窗
+            // 创建一个空的 DOM 节点
+            const container = document.createElement('div');
+            // 将 Vue 组件挂载到该节点
+            createApp(barChart,{ chartData: ans }).mount(container);
+            container.style.width = '100%';  // 设置宽度
+            container.style.height = '100%'; // 设置高度
             new AnimatedPopup({
                 maxWidth: '600px',
                 offset: [-20, -30], 
@@ -146,7 +153,7 @@ onMounted(() => {
                     transform: 'scale'
                 }
             }).setLngLat(e.lngLat) // 设置 Popup 位置为点击的点
-                .setHTML(`<strong>${buildingName}</strong><br>${ans}`) // 显示内容
+                .setDOMContent(container) // 显示内容
                 .addTo(map.value);
         })
 

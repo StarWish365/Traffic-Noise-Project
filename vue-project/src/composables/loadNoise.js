@@ -36,16 +36,16 @@ export function load_noice(time, map, store) {
             map.value.getSource('receivers').setData(geojsonData)
         }
         //console.log(noise)
-        if(store.heatLayercontrol){
+        if (store.heatLayercontrol) {
             if (!map.value.getLayer('noise')) {
-            const layer = interpolateHeatmapLayer({
-                points: noise,
-                layerId: 'noise',
-                p: store.heatP,
-                pointRadius: 100,
-                framebufferFactor: store.FramebufferFactor,
-            });
-            map.value.addLayer(layer);
+                const layer = interpolateHeatmapLayer({
+                    points: noise,
+                    layerId: 'noise',
+                    p: store.heatP,
+                    pointRadius: 100,
+                    framebufferFactor: store.FramebufferFactor,
+                });
+                map.value.addLayer(layer);
             } else {
                 const layer = interpolateHeatmapLayer({
                     points: noise,
@@ -58,7 +58,7 @@ export function load_noice(time, map, store) {
                 map.value.addLayer(layer, 'cars-layer');
             }
         }
-        
+
 
         //console.log("noisepoints:", noise)
     }).catch(error => {
@@ -96,26 +96,6 @@ function filterNoisePoints(noisePoints) {
 
         if (vehicles20m.length > 0) return true; // 20m 内有车，直接保留
 
-        /*         // 查询 20m - 50m 半径内的车辆
-                let vehicles50m = vehicleTree.search({
-                    minX: noisePoint.lon - 0.0008,  // 50m 大致转换为经纬度
-                    minY: noisePoint.lat - 0.0008,
-                    maxX: noisePoint.lon + 0.0008,
-                    maxY: noisePoint.lat + 0.0008
-                });
-        
-                if (vehicles50m.length > 0) return Math.random() < 0.8; // 50m 内有车，80% 概率保留
-        
-                // 查询 50m - 100m 半径内的车辆
-                let vehicles100m = vehicleTree.search({
-                    minX: noisePoint.lon - 0.0012,  // 100m 大致转换为经纬度
-                    minY: noisePoint.lat - 0.0012,
-                    maxX: noisePoint.lon + 0.0012,
-                    maxY: noisePoint.lat + 0.0012
-                });
-        
-                if (vehicles100m.length > 0) return Math.random() < 0.5; // 100m 内有车，50% 概率保留 */
-
         return false; // 超过 100m，直接丢弃
     });
 }
@@ -130,7 +110,7 @@ function noiseCount(noiseData, store, map) {
                 store.receiverstoBuilding[buildingID].receivers[receiverID].overNoisecount++
                 store.receiverstoBuilding[buildingID].sum += Number(store.receiverstoBuilding[buildingID].pop)
             }
-            if (store.receiverstoBuilding[buildingID].sum > 100) {
+            if (store.receiverstoBuilding[buildingID].sum > 500) {
                 if (!store.receiverstoBuilding[buildingID].highlight) {
                     store.receiverstoBuilding[buildingID].highlight = true
                     updateBuildingColor(building, '#ffa500', map)

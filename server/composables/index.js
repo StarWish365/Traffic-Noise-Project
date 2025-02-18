@@ -11,13 +11,13 @@ loadRBush().then(RBush => {
 
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
-const pool = require('../database/db')
+const { pool } = require('../database/db')
 
 // 🚀 **1. 服务器启动时加载 Receiver 数据**
 async function loadReceivers() {
     try {
         const client = await pool.connect();
-        const result = await client.query("SELECT idreceive, ST_X(geom) AS lon, ST_Y(geom) AS lat FROM filtered_receivers");
+        const result = await client.query("SELECT idreceive, ST_X(geom) AS lon, ST_Y(geom) AS lat, bg_pk FROM filtered_receivers");
         client.release();
         return result.rows
     } catch (error) {
@@ -108,7 +108,7 @@ async function processReceiversForTimestep(timestep, receivers) {
     });
 
     // 一次性调用 Python API 预测所有 receivers
-    let response = await fetch("http://127.0.0.1:5000/predict", {
+    let response = await fetch("http://127.0.0.1:5000/predict_inside", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ features: featureVectors })  // 发送所有 receiver 的数据
@@ -119,6 +119,9 @@ async function processReceiversForTimestep(timestep, receivers) {
     // 解析返回的 predictions，并匹配 receiver_id
     return receivers.map((receiver, index) => ({
         receiver_id: receiver.idreceive,
+        lon: receiver.lon,
+        lat: receiver.lat,
+        bg_pk: receiver.bg_pk,
         predicted_laeq: result.predictions[index][0]  // 取对应的预测值
     }));
 }

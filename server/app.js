@@ -1,7 +1,7 @@
 var express = require('express');
 const compression = require('compression');
 const zlib = require('zlib');
-
+const axios = require("axios");
 var app = express();
 
 const bodyParser = require('body-parser');
@@ -25,7 +25,7 @@ app.use(compression({
 }));
 
 const { loadReceivers, processReceiversForTimestep } = require('./composables/index');
-
+const { pool, client } = require('./database/db')
 
 /* const pool = require('./database/db');
 function runScheduledQuery() {
@@ -53,6 +53,29 @@ function shouldCompress(req, res) {
   // 否则，使用 compression 中间件默认的压缩过滤规则
   return compression.filter(req, res);
 }
+
+// 监听 PostgreSQL 的 "timestep_update" 事件
+client.query("LISTEN timestep_update");
+
+// 监听数据库通知
+client.on("notification", async (msg) => {
+  const latestTimestep = msg.payload; // 获取 PostgreSQL 触发器发送的 timestep
+  console.log(`Received updated timestep: ${latestTimestep}`);
+
+  /* try {
+    // 触发 /predict 端点
+    const response = await axios.post("http://localhost:3000/predict", {
+      timestep: latestTimestep,
+    });
+    console.log("Predict API response:", response.data);
+  } catch (error) {
+    console.error("Error calling /predict:", error.message);
+  } */
+});
+
+
+
+
 let receivers
 app.post("/predict", async (req, res) => {
   try {
@@ -61,7 +84,23 @@ app.post("/predict", async (req, res) => {
       return res.status(400).json({ error: "Missing timestep" });
     }
 
-    let predictions = await processReceiversForTimestep(timestep,receivers);
+    let predictions = await processReceiversForTimestep(timestep, receivers);
+    //创建sql插入数据语句
+    const values = predictions.map(pred => `(
+      ${timestep}, 
+      ${pred.receiver_id}, 
+      ${pred.predicted_laeq}, 
+      ST_SetSRID(ST_MakePoint(${pred.lon}, ${pred.lat}), 4326), 
+      ${pred.bg_pk}
+    )`).join(",");
+
+    const insertQuery = `
+      INSERT INTO predicted_laeq (timestep, idreceive, laeq, geom, bg_pk) 
+      VALUES ${values};
+    `;
+    await pool.query("BEGIN");
+    await pool.query(insertQuery);
+    await pool.query("COMMIT");
     res.json(predictions);
     console.log('Success');
   } catch (error) {

@@ -206,6 +206,4 @@ FROM buildings_data;
 
 
 
-
-
 module.exports = router;
