@@ -12,6 +12,7 @@ import carLegend from '@/components/carLegend.vue';
 import lineChart from '@/components/lineChartNew.vue';
 import barChart from '@/components/barChart.vue';
 import layerControl from '@/components/layerControl.vue';
+import ecarControl from '@/components/ecarControl.vue';
 import { ElButton,ElDrawer} from 'element-plus';
 import 'mapbox-gl/dist/mapbox-gl.css'
 import 'element-plus/es/components/button/style/css';
@@ -249,6 +250,7 @@ provide('marker',marker)
             >
             <factorBox/>
             <layerControl/>
+            <ecarControl/>
         </el-drawer>
     </div>
 </template>

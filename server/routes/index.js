@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const pool = require('../database/db');
+const { pool } = require('../database/db');
 
 /* GET home page. */
 router.get('/trydata', function (req, res, next) {
@@ -202,6 +202,15 @@ FROM buildings_data;
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.json(dbResponse.rows);
   });
+});
+
+
+router.get('/api/change_ecar_retio', (req, res) => {
+  const ratio = req.query.ratio
+  console.log('get ratio:', ratio);
+  setTimeout(() => {
+    res.json({ success: true });
+  }, 1000);
 });
 
 
