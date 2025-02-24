@@ -11,6 +11,7 @@ import AnimatedPopup from 'mapbox-gl-animated-popup';
 import carLegend from '@/components/carLegend.vue';
 import lineChart from '@/components/lineChartNew.vue';
 import barChart from '@/components/barChart.vue';
+import progressBar from '@/components/progressBar.vue';
 import layerControl from '@/components/layerControl.vue';
 import ecarControl from '@/components/ecarControl.vue';
 import { ElButton,ElDrawer} from 'element-plus';
@@ -24,6 +25,7 @@ import controlBox from '@//components/controlBox.vue';
 const HeadValue = useValueStore()
 const map = ref(null);
 const marker = ref(null)
+const showHoverPanel = ref(false)
 
 
 onMounted(() => {
@@ -252,6 +254,7 @@ provide('marker',marker)
             <layerControl/>
             <ecarControl/>
         </el-drawer>
+        <progressBar/>
     </div>
 </template>
 

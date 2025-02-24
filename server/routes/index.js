@@ -213,6 +213,45 @@ router.get('/api/change_ecar_retio', (req, res) => {
   }, 1000);
 });
 
+router.get('/api/get_receivers_to_building_time', (req, res) => {
+  const time = req.query.time;
+  let q = `WITH receiver_over_noises AS (
+    SELECT
+        sr.bg_pk AS building_id,
+        sr.pop AS population,
+        sr.idreceive AS receiver_id,
+        COUNT(CASE WHEN ldf.laeq > 65 THEN 1 END) AS over_noisecount
+    FROM
+        selected_receivers sr
+    LEFT JOIN
+        laeq_data_filtered ldf
+    ON
+        sr.idreceive = ldf.idreceive
+    AND
+        ldf.timestep <= ${time}  -- 在输入的 timestep 之前
+    GROUP BY
+        sr.bg_pk, sr.pop, sr.idreceive
+)
+SELECT
+    ron.building_id,
+    ron.population,
+    ron.receiver_id,
+    ron.over_noisecount,
+    SUM(ron.over_noisecount) OVER (PARTITION BY ron.building_id) * ron.population AS building_sum
+FROM
+    receiver_over_noises ron
+ORDER BY
+    ron.building_id, ron.receiver_id;
+
+`
+  pool.query(q, (err, dbResponse) => {
+    if (err) console.log(err); //console.log(dbResponse.rows); // here dbResponse is available, your data processing logic goes here
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.send(dbResponse.rows);
+  }
+  );
+});
+
 
 
 module.exports = router;

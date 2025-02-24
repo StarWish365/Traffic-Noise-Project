@@ -31,7 +31,7 @@
   
     const option = {
       title: {
-        text: "区间统计柱状图",
+        text: "Building Noise Exposure Population",
         left: "center",
       },
       tooltip: {
@@ -40,9 +40,15 @@
       xAxis: {
         type: "category",
         data: ["1-10", "10-20", "20+"],
+        name: "Total Time Exceeding Threshold",
+        nameLocation: "middle",
+        nameTextStyle: {
+        padding: [10, 0, 0, 0], // 调整名称位置
+        },
       },
       yAxis: {
         type: "value",
+        name: "Population"
       },
       series: [
         {
