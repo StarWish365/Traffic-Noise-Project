@@ -25,7 +25,6 @@ import controlBox from '@//components/controlBox.vue';
 const HeadValue = useValueStore()
 const map = ref(null);
 const marker = ref(null)
-const showHoverPanel = ref(false)
 
 
 onMounted(() => {

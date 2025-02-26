@@ -11,6 +11,7 @@ loadRBush().then(RBush => {
 
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
+const { text } = require('express');
 const { pool } = require('../database/db')
 
 // 🚀 **1. 服务器启动时加载 Receiver 数据**
@@ -30,7 +31,7 @@ async function getVehicleData(timestep) {
     try {
         const client = await pool.connect();
         const result = await client.query(
-            "SELECT x, y, speed, veh_type FROM vehicle_data_filtered WHERE timestep = $1",
+            "SELECT x, y, speed, type FROM vehicle_data_filtered_copy WHERE timestep = $1",
             [timestep]
         );
         client.release();
@@ -126,6 +127,69 @@ async function processReceiversForTimestep(timestep, receivers) {
     }));
 }
 
+//ecar ratio更新函数
+async function updateVehicleTypes(ecarRatio) {
+    const client = await pool.connect();
+    try {
+        // **1. 获取总车辆数**
+        const result = await client.query("SELECT COUNT(*) FROM vehicle_types");
+        const totalVehicles = parseInt(result.rows[0].count);
+        const ecarCount = Math.floor(ecarRatio * totalVehicles);
+
+        // **2. 先将所有 type 设为 0（燃油车）**
+        await client.query("UPDATE vehicle_types SET type = 0");
+
+        // **3. 随机选择 ecarCount 个车辆，设置为 1（电动车）**
+        await client.query(`
+            UPDATE vehicle_types
+            SET type = 1
+            WHERE id IN (
+                SELECT id FROM vehicle_types ORDER BY RANDOM() LIMIT $1
+            )
+        `, [ecarCount]);
+
+        // **4. 更新 vehicle_data_filtered 表**
+        await client.query(`
+            UPDATE vehicle_data_filtered_copy AS vdf
+            SET type = vt.type
+            FROM vehicle_types AS vt
+            WHERE vdf.id = vt.id
+        `);
+
+        console.log(`已更新 ${ecarCount} 辆电动车`);
+
+    } catch (error) {
+        console.error("更新车辆类型失败:", error);
+    } finally {
+        client.release();
+    }
+}
+async function loadPLimit() {
+    const { default: pLimit } = await import("p-limit");
+    return pLimit(50);  // 限制最大 10 个并发
+}
+async function processEcarRatioAndPredict(ecarRatio) {
+    // **等待 SQL 执行完**
+    await updateVehicleTypes(ecarRatio);
+
+    console.log("车辆数据已更新，开始预测...");
+    const limit = await loadPLimit()
+    let promises = []
+    // **循环执行 `/predict`**
+    for (let timestep = 500; timestep < 800; timestep++) {
+        console.log(`预测 timestep: ${timestep}`);
+        let promise = limit(() => fetch("http://127.0.0.1:3000/predict", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ timestep })
+        }).then(res => res.text()));
+        promises.push(promise);
+    }
+    let results = await Promise.allSettled(promises);
+    console.log("成功预测数量", promises.length);
+}
 
 
-module.exports = { loadReceivers, processReceiversForTimestep };
+
+
+module.exports = { loadReceivers, processReceiversForTimestep, processEcarRatioAndPredict };

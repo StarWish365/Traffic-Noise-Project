@@ -44,7 +44,7 @@ FROM (
         SELECT 'Feature' As type, 
                ST_AsGeoJSON(lg.geom)::json As geometry, 
                row_to_json((SELECT l FROM (SELECT id,speed,type) As l)) As properties 
-        FROM vehicle_data_new As lg 
+        FROM vehicle_data_filtered As lg 
         WHERE timestep = ${time}
     ) As f
 ) As fc;
@@ -203,15 +203,30 @@ FROM buildings_data;
     res.json(dbResponse.rows);
   });
 });
+const {processEcarRatioAndPredict}=require('../composables/index')
+router.get('/api/change_ecar_ratio', async (req, res) => {
+  try {
+      const ratio = parseFloat(req.query.ratio); // 获取 `ratio`，转换为浮点数
 
+      if (isNaN(ratio) || ratio < 0 || ratio > 1) {
+          return res.status(400).json({ error: "Invalid ecar_ratio, must be between 0 and 1" });
+      }
 
-router.get('/api/change_ecar_retio', (req, res) => {
-  const ratio = req.query.ratio
-  console.log('get ratio:', ratio);
-  setTimeout(() => {
-    res.json({ success: true });
-  }, 1000);
+      console.log(`🔄 Received ecar_ratio: ${ratio}`);
+
+      await processEcarRatioAndPredict(ratio)
+
+      console.log("✅ 所有时间步预测完成！");
+
+      // **3️⃣ 返回成功响应**
+      res.json({ success: true });
+
+  } catch (error) {
+      console.error("❌ 处理失败:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+  }
 });
+
 
 router.get('/api/get_receivers_to_building_time', (req, res) => {
   const time = req.query.time;

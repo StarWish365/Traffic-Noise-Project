@@ -18,6 +18,8 @@
   import { ElSlider } from 'element-plus'
   import { processNoiseData } from '@/composables/getReceiverstoBuilding';
   import { useValueStore } from '@/stores/HeadValue';
+  import { load_cars } from '@/composables/loadCars';
+  import { load_noice } from '@/composables/loadNoise';
   import 'element-plus/es/components/slider/style/css';
 
   const HeadValue = useValueStore()
@@ -40,6 +42,8 @@
 const refreshMapValue = async()=>{
   await processNoiseData(HeadValue,currentTime.value)
   updateBuildingColors(HeadValue.receiverstoBuilding,map)
+  load_noice(currentTime.value,map,HeadValue)
+  load_cars(currentTime.value,map,HeadValue.sel,HeadValue);
 }
   // 防抖函数
   const debouncedLogTime = debounce(refreshMapValue, 2000)
@@ -49,7 +53,7 @@ const refreshMapValue = async()=>{
   const timeDifference = Math.abs(newValue - previousTime)
 
   // 只有当时间变化超过 5 秒才会触发
-  if (timeDifference > 5) {
+  if (timeDifference > 5 && currentTime.value!==500) {
     previousTime = newValue
     debouncedLogTime()
   }
@@ -69,7 +73,7 @@ function updateBuildingColors(buildingData, map) {
         const buildingId = parseInt(buildingKey.replace('building', ''), 10); // 提取 building ID
 
         // 根据 highlight 设置颜色
-        let newColor = '#aaa'; // 默认颜色
+        let newColor = '#7a7a7a'; // 默认颜色
         if (building.highlight === 1) {
             newColor = '#FFFF00'; // 黄色
         } else if (building.highlight === 2) {

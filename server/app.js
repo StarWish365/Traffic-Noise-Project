@@ -102,7 +102,7 @@ app.post("/predict", async (req, res) => {
     await pool.query(insertQuery);
     await pool.query("COMMIT");
     res.json(predictions);
-    console.log('Success');
+    console.log('Success',timestep);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });

@@ -44,6 +44,8 @@ export function load_noice(time, map, store) {
                     p: store.heatP,
                     pointRadius: 100,
                     framebufferFactor: store.FramebufferFactor,
+                    minValue: 30,
+                    maxValue: 70,
                 });
                 map.value.addLayer(layer);
             } else {
@@ -53,6 +55,8 @@ export function load_noice(time, map, store) {
                     p: store.heatP,
                     pointRadius: 100,
                     framebufferFactor: store.FramebufferFactor,
+                    minValue: 30,
+                    maxValue: 70,
                 });
                 map.value.removeLayer('noise');
                 map.value.addLayer(layer, 'cars-layer');
@@ -110,17 +114,17 @@ function noiseCount(noiseData, store, map) {
                 store.receiverstoBuilding[buildingID].receivers[receiverID].overNoisecount++
                 store.receiverstoBuilding[buildingID].sum += Number(store.receiverstoBuilding[buildingID].pop)
             }
-            if (store.receiverstoBuilding[buildingID].sum > 1500){
+            if (store.receiverstoBuilding[buildingID].sum > 1500) {
                 if (store.receiverstoBuilding[buildingID].highlight === 2) {
                     store.receiverstoBuilding[buildingID].highlight = 3
                     updateBuildingColor(building, '#ff0000', map)
                 }
-            }else if (store.receiverstoBuilding[buildingID].sum > 1000) {
+            } else if (store.receiverstoBuilding[buildingID].sum > 1000) {
                 if (store.receiverstoBuilding[buildingID].highlight === 1) {
                     store.receiverstoBuilding[buildingID].highlight = 2
                     updateBuildingColor(building, '#ffa500', map)
                 }
-            }else if (store.receiverstoBuilding[buildingID].sum > 500) {
+            } else if (store.receiverstoBuilding[buildingID].sum > 500) {
                 if (store.receiverstoBuilding[buildingID].highlight === 0) {
                     store.receiverstoBuilding[buildingID].highlight = 1
                     updateBuildingColor(building, '#Ffff00', map)
