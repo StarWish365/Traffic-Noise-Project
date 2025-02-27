@@ -18,7 +18,7 @@ const { pool } = require('../database/db')
 async function loadReceivers() {
     try {
         const client = await pool.connect();
-        const result = await client.query("SELECT idreceive, ST_X(geom) AS lon, ST_Y(geom) AS lat, bg_pk FROM filtered_receivers");
+        const result = await client.query("SELECT idreceive, ST_X(geom) AS lon, ST_Y(geom) AS lat, bg_pk,is_blocked FROM filtered_receivers");
         client.release();
         return result.rows
     } catch (error) {
@@ -76,56 +76,86 @@ function euclideanDistance(x1, y1, x2, y2) {
 
 // 🚀 **5. 组织特征向量**
 function formatFeatures(vehicles) {
-    const maxVehicles = 10;
-    let speeds = [];
-    let distances = [];
-    let vehicleTypes = [];
-
-    for (let v of vehicles) {
-        speeds.push(v.speed);
-        distances.push(v.distance);
-        vehicleTypes.push(v.veh_type);
-        if (speeds.length === maxVehicles) break
+    if (vehicles.length === 0) {
+        return [0,1,1,0];  // 没有车辆，返回默认值
     }
 
-    while (speeds.length < maxVehicles) {
-        speeds.push(0);
-        distances.push(1);
-        vehicleTypes.push(0);
-    }
+    const vehicleNum = vehicles.length;
+    const avgSpeed = vehicles.reduce((sum, v) => sum + v.speed, 0) / vehicleNum;
+    const avgDistance = vehicles.reduce((sum, v) => sum + v.distance, 0) / vehicleNum;
+    const avgType = vehicles.reduce((sum, v) => sum + v.type, 0) / vehicleNum;
 
-    return [...speeds, ...distances, ...vehicleTypes];
+    return [avgSpeed, avgType, avgDistance, vehicleNum];
 }
+
 
 // 6. 处理 Receiver 并调用 Python API
 async function processReceiversForTimestep(timestep, receivers) {
     let vehicles = await getVehicleData(timestep);
     loadVehiclesIntoRBush(vehicles);
 
-    // 批量处理所有 receivers，生成 feature vectors
-    let featureVectors = receivers.map(receiver => {
+    // **按照 if_inside 分组**
+    let insideReceivers = [];
+    let outsideReceivers = [];
+    let insideFeatures = [];
+    let outsideFeatures = [];
+
+    for (let receiver of receivers) {
         let nearbyVehicles = findNearbyVehicles(receiver.lon, receiver.lat, 0.001);
-        return formatFeatures(nearbyVehicles);
-    });
+        let featureVector = formatFeatures(nearbyVehicles);
 
-    // 一次性调用 Python API 预测所有 receivers
-    let response = await fetch("http://127.0.0.1:5000/predict_inside", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ features: featureVectors })  // 发送所有 receiver 的数据
-    });
+        if (receiver.is_blocked === 1) {
+            insideReceivers.push(receiver);
+            insideFeatures.push(featureVector);
+        } else {
+            outsideReceivers.push(receiver);
+            outsideFeatures.push(featureVector);
+        }
+    }
 
-    let result = await response.json();
+    // **调用不同的 Python API**
+    let insideResults = [];
+    let outsideResults = [];
 
-    // 解析返回的 predictions，并匹配 receiver_id
-    return receivers.map((receiver, index) => ({
-        receiver_id: receiver.idreceive,
-        lon: receiver.lon,
-        lat: receiver.lat,
-        bg_pk: receiver.bg_pk,
-        predicted_laeq: result.predictions[index][0]  // 取对应的预测值
-    }));
+    if (insideFeatures.length > 0) {
+        let response = await fetch("http://127.0.0.1:5000/predict_inside", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ features: insideFeatures })
+        });
+        
+        let result = await response.json();
+
+        insideResults = insideReceivers.map((receiver, index) => ({
+            receiver_id: receiver.idreceive,
+            lon: receiver.lon,
+            lat: receiver.lat,
+            bg_pk: receiver.bg_pk,
+            predicted_laeq: result.predictions[index]
+        }));
+    }
+
+
+    if (outsideFeatures.length > 0) {
+        let response = await fetch("http://127.0.0.1:5000/predict_outside", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ features: outsideFeatures })
+        });
+        let result = await response.json();
+        outsideResults = outsideReceivers.map((receiver, index) => ({
+            receiver_id: receiver.idreceive,
+            lon: receiver.lon,
+            lat: receiver.lat,
+            bg_pk: receiver.bg_pk,
+            predicted_laeq: result.predictions[index]
+        }));
+    }
+
+    // **合并两部分的结果**
+    return [...insideResults, ...outsideResults];
 }
+
 
 //ecar ratio更新函数
 async function updateVehicleTypes(ecarRatio) {
@@ -135,6 +165,7 @@ async function updateVehicleTypes(ecarRatio) {
         const result = await client.query("SELECT COUNT(*) FROM vehicle_types");
         const totalVehicles = parseInt(result.rows[0].count);
         const ecarCount = Math.floor(ecarRatio * totalVehicles);
+        console.log(result);
 
         // **2. 先将所有 type 设为 0（燃油车）**
         await client.query("UPDATE vehicle_types SET type = 0");
@@ -154,6 +185,10 @@ async function updateVehicleTypes(ecarRatio) {
             SET type = vt.type
             FROM vehicle_types AS vt
             WHERE vdf.id = vt.id
+        `);
+        //先删除原laeq数据
+        await client.query(`
+            TRUNCATE TABLE predicted_laeq;
         `);
 
         console.log(`已更新 ${ecarCount} 辆电动车`);
@@ -177,7 +212,7 @@ async function processEcarRatioAndPredict(ecarRatio) {
     let promises = []
     // **循环执行 `/predict`**
     for (let timestep = 500; timestep < 800; timestep++) {
-        console.log(`预测 timestep: ${timestep}`);
+        /* console.log(`预测 timestep: ${timestep}`); */
         let promise = limit(() => fetch("http://127.0.0.1:3000/predict", {
             method: "POST",
             headers: { "Content-Type": "application/json" },

@@ -6,7 +6,7 @@
         @mouseleave="hidePanel"
       >
         <p>Timeline</p>
-        <el-slider v-model="currentTime" :step="1" :min=500 :max=800 />
+        <el-slider v-model="currentTime" :step="1" :min=500 :max=800 @input="onDrag" @change="onSeekEnd" />
       </div>
     </transition>
 
@@ -14,7 +14,7 @@
   </template>
   
   <script setup>
-  import { ref, onMounted, onBeforeUnmount,nextTick,inject,watch} from 'vue'
+  import { ref, onMounted, onBeforeUnmount,nextTick,inject} from 'vue'
   import { ElSlider } from 'element-plus'
   import { processNoiseData } from '@/composables/getReceiverstoBuilding';
   import { useValueStore } from '@/stores/HeadValue';
@@ -26,17 +26,6 @@
 
   const currentTime = inject('currentTime')
   const map = inject('map')
-  let previousTime = 0 // 记录上一次时间
-  // 防抖函数
-  function debounce(func, delay) {
-    let timer = null
-    return function (...args) {
-      clearTimeout(timer)
-      timer = setTimeout(() => {
-        func.apply(this, args)
-      }, delay)
-    }
-  }
 
   //更新函数
 const refreshMapValue = async()=>{
@@ -45,20 +34,20 @@ const refreshMapValue = async()=>{
   load_noice(currentTime.value,map,HeadValue)
   load_cars(currentTime.value,map,HeadValue.sel,HeadValue);
 }
-  // 防抖函数
-  const debouncedLogTime = debounce(refreshMapValue, 2000)
+const isDragging = ref(false);
+// 用户拖动进度条
+const onDrag = () => {
+  isDragging.value = true;
+};
 
-  // 监听 currentTime 变化
-  watch(currentTime, (newValue) => {
-  const timeDifference = Math.abs(newValue - previousTime)
+// 用户拖动结束，松手后触发
+const onSeekEnd = (newTime) => {
+  if (!isDragging.value) return; // 如果不是手动拖动导致的变化，忽略
 
-  // 只有当时间变化超过 5 秒才会触发
-  if (timeDifference > 5 && currentTime.value!==500) {
-    previousTime = newValue
-    debouncedLogTime()
-  }
-})
-
+  isDragging.value = false; // 标记拖动结束
+  console.log('newTime:', newTime);
+  refreshMapValue()
+};
 
 
 //更新建筑颜色

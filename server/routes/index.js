@@ -20,7 +20,7 @@ FROM (
         SELECT 'Feature' As type,
                ST_AsGeoJSON(ST_Transform(lg.geom, 4326))::json As geometry,  -- 转换为WGS84坐标系
                row_to_json((SELECT l FROM (SELECT idreceive, timestep, laeq, bg_pk) As l)) As properties
-        FROM laeq_data_filtered As lg
+        FROM predicted_laeq As lg
         WHERE timestep = ${time}
     ) As f
 ) As fc;
@@ -44,7 +44,7 @@ FROM (
         SELECT 'Feature' As type, 
                ST_AsGeoJSON(lg.geom)::json As geometry, 
                row_to_json((SELECT l FROM (SELECT id,speed,type) As l)) As properties 
-        FROM vehicle_data_filtered As lg 
+        FROM vehicle_data_filtered_copy As lg 
         WHERE timestep = ${time}
     ) As f
 ) As fc;
@@ -72,7 +72,7 @@ closest_point AS (
   SELECT 
       m.idreceive
   FROM 
-      laeq_data m, 
+      predicted_laeq m, 
       query_point qp
   -- 按地理距离排序，取出最近的点
   ORDER BY 
@@ -87,7 +87,7 @@ aggregated_data AS (
       ST_SetSRID(ST_Force2D(min(m.geom)), 4326) AS geom, -- 强制确保几何数据为 EPSG:4326
       (${time})::integer AS timestep -- 设置为传入的 timestep 值
   FROM 
-      laeq_data m
+      predicted_laeq m
   JOIN 
       closest_point cp ON m.idreceive = cp.idreceive
   WHERE 
@@ -124,7 +124,7 @@ FROM
 router.get('/api/get_next_noise', (req, res) => {
   var time = req.query.time;
   var idreceiver = req.query.idreceiver;
-  let q = `SELECT laeq from laeq_data where idreceive = ${idreceiver} and timestep = ${time}`
+  let q = `SELECT laeq from predicted_laeq where idreceive = ${idreceiver} and timestep = ${time}`
   pool.query(q, (err, dbResponse) => {
     if (err) console.log(err);
     res.setHeader('Access-Control-Allow-Origin', '*');

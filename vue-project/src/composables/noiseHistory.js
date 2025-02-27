@@ -10,7 +10,7 @@ export function getNoiseHistory(lng, lat, time, map, HeadValue, marker) {
 
     return request.get('get_noise_value', { params })
         .then((response) => {
-            //console.log('服务器返回的数据:', response.data)
+            console.log('服务器返回的数据:', response.data)
             // 处理返回的数据，例如更新地图上的图层或显示数据
             const coordinates = response.data[0].result.geometry.coordinates
             const noiseHistory = response.data[0].result.properties.laeq

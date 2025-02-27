@@ -16,7 +16,7 @@ const showResponse = ref(false); // 控制淡入淡出
 
 const changeECarRatio = async () => {
     try {
-        const res = await request.get(`change_ecar_retio?ratio=${ecarRatio.value}`);
+        const res = await request.get(`change_ecar_ratio?ratio=${ecarRatio.value}`);
         response.value = res.data.success ? 'Success' : 'Failed';
 
         // 触发淡入效果

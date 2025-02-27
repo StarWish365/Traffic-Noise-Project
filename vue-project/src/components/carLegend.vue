@@ -75,7 +75,7 @@
   width: 100%;
   height: 15px;
   border-radius: 5px;
-  background: linear-gradient(to right, blue, red);
+  background: linear-gradient(to right, #5c68c4, #c15f4f);
   border: 1px solid #ccc;
 }
 

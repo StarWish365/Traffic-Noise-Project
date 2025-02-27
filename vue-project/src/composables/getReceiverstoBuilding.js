@@ -58,7 +58,7 @@ export function processNoiseData(store, time) {
                 overNoisecount: over_noisecount
             }
         })
-        console.log(result)
+        /* console.log(result) */
 
         store.receiverstoBuilding = result
     })

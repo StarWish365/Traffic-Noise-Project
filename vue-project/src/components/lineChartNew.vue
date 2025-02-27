@@ -52,7 +52,9 @@ const initChart = (laeqData = emptyData.laeq) => {
         min:'dataMin',
         max:'dataMax',
         axisLabel: {
-          formatter: '{value}',
+          formatter: function(value) {
+            return value.toFixed(2); // 保留两位小数
+          }
         },
       },
       visualMap:{
