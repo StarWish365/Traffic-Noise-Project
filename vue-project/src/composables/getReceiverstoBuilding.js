@@ -9,7 +9,7 @@ export function getReceiverstoBuilding(store) {
             if (!result[buildingID]) {
                 result[buildingID] = {
                     highlight: 0,  // 默认不高亮
-                    pop: pop,          // 将 pop 移到 buildingID 层级
+                    pop: Number(pop),          // 将 pop 移到 buildingID 层级
                     sum: 0,
                     receivers: {}      // 存储 receiver 数据
                 };

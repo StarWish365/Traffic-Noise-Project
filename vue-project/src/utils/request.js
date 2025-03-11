@@ -8,6 +8,10 @@ const instance = axios.create({
 // 添加请求拦截器
 instance.interceptors.request.use(function (config) {
     // 在发送请求之前做些什么
+    const userId = localStorage.getItem('userId');  // 读取 userId
+    if (userId) {
+        config.headers['Authorization'] = `Bearer ${userId}`;  // 添加到请求头
+    }
     return config;
 }, function (error) {
     // 对请求错误做些什么

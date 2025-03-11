@@ -5,6 +5,8 @@
   <script setup>
   import { ref, watch, onMounted, onBeforeUnmount, defineProps } from "vue";
   import * as echarts from "echarts";
+  import { useValueStore } from "@/stores/HeadValue";
+  const HeadValue = useValueStore()
   
   // 定义 props
   const props = defineProps({
@@ -13,6 +15,7 @@
       required: true,
       validator: (value) => value.length === 3, // 确保数据长度为 3
     },
+    buildingName:String
   });
   
   const chartRef = ref(null);
@@ -68,7 +71,6 @@
   
   // 监听数据变化，动态更新图表
   watch(() => props.chartData, updateChart, { deep: true });
-  
   // 组件挂载时初始化图表
   onMounted(() => {
     initChart();

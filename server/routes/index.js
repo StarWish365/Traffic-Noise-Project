@@ -12,6 +12,16 @@ router.get('/trydata', function (req, res, next) {
 
 router.get('/api/get_noice_time', (req, res) => {
   var time = req.query.time;
+  const authHeader = req.headers.authorization;
+  let userId = null;
+
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    userId = authHeader.split(" ")[1]; // 提取 Bearer token
+  }
+  if (!userId) {
+    return res.status(400).json({ error: "Missing userId" });
+  }
+  const userTable_laeq = `predicted_laeq_${userId}`;
   let q = `SELECT row_to_json(fc)
 FROM (
     SELECT 'FeatureCollection' As type,
@@ -20,14 +30,14 @@ FROM (
         SELECT 'Feature' As type,
                ST_AsGeoJSON(ST_Transform(lg.geom, 4326))::json As geometry,  -- 转换为WGS84坐标系
                row_to_json((SELECT l FROM (SELECT idreceive, timestep, laeq, bg_pk) As l)) As properties
-        FROM predicted_laeq As lg
+        FROM ${userTable_laeq} As lg
         WHERE timestep = ${time}
     ) As f
 ) As fc;
 `
-  //var q = "SELECT row_to_json (fc) FROM(SELECT 'FeatureCollection' As type , array_to_json ( array_agg (f))As features FROM(SELECT 'Feature' As type , ST_AsGeoJSON (lg.geom):: json As geometry, row_to_json ((SELECT l FROM ( Select id,idreceiver,timestep_t,laeq  ) As l)) As properties FROM  lday_timestep As lg where timestep_t=" + time + ") As f) As fc;"
+
   pool.query(q, (err, dbResponse) => {
-    if (err) console.log(err); //console.log(dbResponse.rows); // here dbResponse is available, your data processing logic goes here
+    if (err) console.log(err);
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.send(dbResponse.rows);
   }
@@ -36,6 +46,16 @@ FROM (
 
 router.get('/api/get_cars_time', (req, res) => {
   var time = req.query.time;
+  const authHeader = req.headers.authorization;
+  let userId = null;
+
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    userId = authHeader.split(" ")[1]; // 提取 Bearer token
+  }
+  if (!userId) {
+    return res.status(400).json({ error: "Missing userId" });
+  }
+  const userTable_vehicle = `vehicle_moving_data_${userId}`;
   let q = `SELECT row_to_json(fc) 
 FROM (
     SELECT 'FeatureCollection' As type, 
@@ -44,7 +64,7 @@ FROM (
         SELECT 'Feature' As type, 
                ST_AsGeoJSON(lg.geom)::json As geometry, 
                row_to_json((SELECT l FROM (SELECT id,speed,type) As l)) As properties 
-        FROM vehicle_data_filtered_copy As lg 
+        FROM ${userTable_vehicle} As lg 
         WHERE timestep = ${time}
     ) As f
 ) As fc;
@@ -59,56 +79,51 @@ FROM (
 });
 //${time}
 router.get('/api/get_noise_value', (req, res) => {
-  const time = req.query.time
   const lng = req.query.longitude
   const lat = req.query.latitude
   //console.log(time, lng, lat)
-  const q = `WITH query_point AS (
-  -- 创建给定坐标的点几何，确保设置为 EPSG:4326
-  SELECT ST_SetSRID(ST_GeomFromText('POINT(${lng} ${lat})'), 4326) AS geom
-),
-closest_point AS (
-  -- 找出离给定坐标最近的点，确保使用 EPSG:4326 坐标系
-  SELECT 
-      m.idreceive
-  FROM 
-      predicted_laeq m, 
-      query_point qp
-  -- 按地理距离排序，取出最近的点
-  ORDER BY 
-      ST_DistanceSphere(m.geom, qp.geom) -- 使用正确的坐标系进行距离计算
-  LIMIT 1
-),
-aggregated_data AS (
-  -- 找出最近点的所有 timestep 数据，并筛选出指定时间步之前的数据，合并 laeq
-  SELECT 
-      m.idreceive,
-      array_agg(m.laeq ORDER BY m.timestep) AS laeq_list,
-      ST_SetSRID(ST_Force2D(min(m.geom)), 4326) AS geom, -- 强制确保几何数据为 EPSG:4326
-      (${time})::integer AS timestep -- 设置为传入的 timestep 值
-  FROM 
-      predicted_laeq m
-  JOIN 
-      closest_point cp ON m.idreceive = cp.idreceive
-  WHERE 
-      m.timestep <= ${time} -- 筛选出在指定时间步之前的数据
-  GROUP BY 
-      m.idreceive
-)
--- 构建 GeoJSON 输出
-SELECT 
-    json_build_object(
-        'type', 'Feature',
-        'geometry', ST_AsGeoJSON(geom)::json, -- 确保输出为标准经纬度坐标
-        'properties', json_build_object(
-            'idreceiver', idreceive,
-            'laeq', laeq_list,
-            'timestep', timestep
-        )
-    ) AS result
-FROM 
-    aggregated_data;
-
+  const q = `
+    WITH query_point AS (
+      -- 创建给定坐标的点几何，确保设置为 EPSG:4326
+      SELECT ST_SetSRID(ST_GeomFromText('POINT(${lng} ${lat})'), 4326) AS geom
+    ),
+    closest_point AS (
+      -- 找出离给定坐标最近的点，确保使用 EPSG:4326 坐标系
+      SELECT 
+          m.idreceive
+      FROM 
+          predicted_laeq m, 
+          query_point qp
+      -- 按地理距离排序，取出最近的点
+      ORDER BY 
+          ST_DistanceSphere(m.geom, qp.geom) -- 使用正确的坐标系进行距离计算
+      LIMIT 1
+    ),
+    aggregated_data AS (
+      -- 找出最近点的所有 timestep 数据，并合并 laeq
+      SELECT 
+          m.idreceive,
+          array_agg(m.laeq ORDER BY m.timestep) AS laeq_list,
+          ST_SetSRID(ST_Force2D(min(m.geom)), 4326) AS geom -- 这里去掉了额外的逗号
+      FROM 
+          predicted_laeq m
+      JOIN 
+          closest_point cp ON m.idreceive = cp.idreceive
+      GROUP BY 
+          m.idreceive
+    )
+    -- 构建 GeoJSON 输出
+    SELECT 
+        json_build_object(
+            'type', 'Feature',
+            'geometry', ST_AsGeoJSON(geom)::json, -- 确保输出为标准经纬度坐标
+            'properties', json_build_object(
+                'idreceiver', idreceive,
+                'laeq', laeq_list 
+            )
+        ) AS result
+    FROM 
+        aggregated_data;
   `
   pool.query(q, (err, results) => {
     if (err) {
@@ -121,17 +136,6 @@ FROM
   });
 })
 
-router.get('/api/get_next_noise', (req, res) => {
-  var time = req.query.time;
-  var idreceiver = req.query.idreceiver;
-  let q = `SELECT laeq from predicted_laeq where idreceive = ${idreceiver} and timestep = ${time}`
-  pool.query(q, (err, dbResponse) => {
-    if (err) console.log(err);
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.send(dbResponse);
-  }
-  );
-});
 
 router.get('/api/get_building_id', (req, res) => {
   const polygon = req.query.polygon;
@@ -163,7 +167,7 @@ router.get('/api/get_building_id', (req, res) => {
 router.get('/api/get_receivers_to_building', (req, res) => {
   let query = `
     SELECT idreceive, bg_pk, pop 
-    FROM selected_receivers;
+    FROM filtered_receivers;
   `;
 
   pool.query(query, (err, dbResponse) => {
@@ -203,27 +207,37 @@ FROM buildings_data;
     res.json(dbResponse.rows);
   });
 });
-const {processEcarRatioAndPredict}=require('../composables/index')
+const { processEcarRatioAndPredict } = require('../composables/index')
 router.get('/api/change_ecar_ratio', async (req, res) => {
   try {
-      const ratio = parseFloat(req.query.ratio); // 获取 `ratio`，转换为浮点数
+    const authHeader = req.headers.authorization;
+    let userId = null;
 
-      if (isNaN(ratio) || ratio < 0 || ratio > 1) {
-          return res.status(400).json({ error: "Invalid ecar_ratio, must be between 0 and 1" });
-      }
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      userId = authHeader.split(" ")[1]; // 提取 Bearer token
+    }
+    if (!userId) {
+      return res.status(400).json({ error: "Missing userId" });
+    }
 
-      console.log(`🔄 Received ecar_ratio: ${ratio}`);
+    const ratio = parseFloat(req.query.ratio); // 获取 `ratio`，转换为浮点数
 
-      await processEcarRatioAndPredict(ratio)
+    if (isNaN(ratio) || ratio < 0 || ratio > 1) {
+      return res.status(400).json({ error: "Invalid ecar_ratio, must be between 0 and 1" });
+    }
 
-      console.log("✅ 所有时间步预测完成！");
+    console.log(`Received ecar_ratio: ${ratio}`);
 
-      // **3️⃣ 返回成功响应**
-      res.json({ success: true });
+    console.log('userId:', userId)
+
+    await processEcarRatioAndPredict(ratio, userId)
+
+    console.log("所有时间步预测完成！");
+    res.json({ success: true });
 
   } catch (error) {
-      console.error("❌ 处理失败:", error);
-      res.status(500).json({ error: "Internal Server Error" });
+    console.error("处理失败:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
@@ -237,9 +251,9 @@ router.get('/api/get_receivers_to_building_time', (req, res) => {
         sr.idreceive AS receiver_id,
         COUNT(CASE WHEN ldf.laeq > 65 THEN 1 END) AS over_noisecount
     FROM
-        selected_receivers sr
+        filtered_receivers sr
     LEFT JOIN
-        laeq_data_filtered ldf
+        predicted_laeq ldf
     ON
         sr.idreceive = ldf.idreceive
     AND
@@ -266,6 +280,80 @@ ORDER BY
   }
   );
 });
+
+router.get("/api/connect", async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    let userId = null;
+
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      userId = authHeader.split(" ")[1]; // 提取 Bearer token
+    }
+    if (!userId) {
+      return res.status(400).json({ error: "Missing userId" });
+    }
+
+    console.log(`用户 ${userId} 连接，创建临时表`);
+
+    // 创建用户专属临时表
+    const userTable_laeq = `predicted_laeq_${userId}`;
+    const userTable_vehicle = `vehicle_moving_data_${userId}`;
+    const createTableQuery = `
+      CREATE TABLE IF NOT EXISTS ${userTable_laeq} (
+          timestep INT,
+          idreceive INT,
+          laeq FLOAT,
+          geom GEOMETRY,
+          bg_pk INT
+      );
+      CREATE TABLE ${userTable_vehicle} AS TABLE vehicle_moving_data;
+    `;
+
+    const client = await pool.connect();
+    await client.query(createTableQuery);
+    client.release();
+
+    res.json({ success: true, message: "临时表已创建" });
+
+  } catch (error) {
+    console.error("❌ 创建临时表失败:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+router.post("/api/logout", express.text(), async (req, res) => {
+  try {
+    /* const authHeader = req.headers.authorization;
+    let userId = null;
+
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      userId = authHeader.split(" ")[1]; // 提取 Bearer token
+    } */
+
+    const data = JSON.parse(req.body);
+    const userId = data.userId;
+    if (!userId) {
+      return res.status(400).json({ error: "Missing userId" });
+    }
+
+    console.log(`🔴 用户 ${userId} 退出，清理临时表`);
+
+    const userTable_laeq = `predicted_laeq_${userId}`;
+    const userTable_vehicle = `vehicle_moving_data_${userId}`;
+    const dropTableQuery = `DROP TABLE IF EXISTS ${userTable_laeq};DROP TABLE IF EXISTS ${userTable_vehicle};`;
+
+    const client = await pool.connect();
+    await client.query(dropTableQuery);
+    client.release();
+
+    res.json({ success: true, message: "登出成功，临时表已删除" });
+
+  } catch (error) {
+    console.error("❌ 清理临时表失败:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 
 
 

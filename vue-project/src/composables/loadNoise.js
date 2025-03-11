@@ -15,6 +15,7 @@ export function load_noice(time, map, store) {
         noiseCount(rawNoise, store, map)
         updateVehicleIndex(store.vehicleLocation)
         const noise = filterNoisePoints(rawNoise)
+        console.log("取receivers数量:", noise.length)
         const geojsonData = convertToGeoJSON(noise)
         if (!map.value.getSource('receivers')) {
             /* console.log(geojsonData) */
@@ -89,13 +90,14 @@ function updateVehicleIndex(vehicleData) {
 
 
 function filterNoisePoints(noisePoints) {
+    const area = 0.0005
     return noisePoints.filter(noisePoint => {
         // 查询 20m 半径内的车辆
         let vehicles20m = vehicleTree.search({
-            minX: noisePoint.lon - 0.0004,  // 20m 大致转换为经纬度
-            minY: noisePoint.lat - 0.0004,
-            maxX: noisePoint.lon + 0.0004,
-            maxY: noisePoint.lat + 0.0004
+            minX: noisePoint.lon - area,  // 20m 大致转换为经纬度
+            minY: noisePoint.lat - area,
+            maxX: noisePoint.lon + area,
+            maxY: noisePoint.lat + area
         });
 
         if (vehicles20m.length > 0) return true; // 20m 内有车，直接保留
@@ -112,7 +114,7 @@ function noiseCount(noiseData, store, map) {
             const receiverID = `receiver${id}`;
             if (store.receiverstoBuilding[buildingID].receivers[receiverID]) {
                 store.receiverstoBuilding[buildingID].receivers[receiverID].overNoisecount++
-                store.receiverstoBuilding[buildingID].sum += Number(store.receiverstoBuilding[buildingID].pop)
+                store.receiverstoBuilding[buildingID].sum = Number(store.receiverstoBuilding[buildingID].sum) + Number(store.receiverstoBuilding[buildingID].pop)
             }
             if (store.receiverstoBuilding[buildingID].sum > 1500) {
                 if (store.receiverstoBuilding[buildingID].highlight === 2) {

@@ -27,12 +27,12 @@ async function loadReceivers() {
 }
 
 // 🚀 **2. 查询 `timestep` 对应的车辆数据**
-async function getVehicleData(timestep) {
+async function getVehicleData(timestep, userId) {
     try {
         const client = await pool.connect();
+        const vehTable = `vehicle_moving_data_${userId}`
         const result = await client.query(
-            "SELECT x, y, speed, type FROM vehicle_data_filtered_copy WHERE timestep = $1",
-            [timestep]
+            `SELECT x, y, speed, type FROM ${vehTable} WHERE timestep = ${timestep}`
         );
         client.release();
         return result.rows;
@@ -77,7 +77,7 @@ function euclideanDistance(x1, y1, x2, y2) {
 // 🚀 **5. 组织特征向量**
 function formatFeatures(vehicles) {
     if (vehicles.length === 0) {
-        return [0,1,1,0];  // 没有车辆，返回默认值
+        return [0, 1, 1, 0];  // 没有车辆，返回默认值
     }
 
     const vehicleNum = vehicles.length;
@@ -90,8 +90,8 @@ function formatFeatures(vehicles) {
 
 
 // 6. 处理 Receiver 并调用 Python API
-async function processReceiversForTimestep(timestep, receivers) {
-    let vehicles = await getVehicleData(timestep);
+async function processReceiversForTimestep(timestep, receivers, userId) {
+    let vehicles = await getVehicleData(timestep, userId);
     loadVehiclesIntoRBush(vehicles);
 
     // **按照 if_inside 分组**
@@ -123,7 +123,7 @@ async function processReceiversForTimestep(timestep, receivers) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ features: insideFeatures })
         });
-        
+
         let result = await response.json();
 
         insideResults = insideReceivers.map((receiver, index) => ({
@@ -158,14 +158,13 @@ async function processReceiversForTimestep(timestep, receivers) {
 
 
 //ecar ratio更新函数
-async function updateVehicleTypes(ecarRatio) {
+async function updateVehicleTypes(ecarRatio, userId) {
     const client = await pool.connect();
     try {
         // **1. 获取总车辆数**
         const result = await client.query("SELECT COUNT(*) FROM vehicle_types");
         const totalVehicles = parseInt(result.rows[0].count);
         const ecarCount = Math.floor(ecarRatio * totalVehicles);
-        console.log(result);
 
         // **2. 先将所有 type 设为 0（燃油车）**
         await client.query("UPDATE vehicle_types SET type = 0");
@@ -179,16 +178,20 @@ async function updateVehicleTypes(ecarRatio) {
             )
         `, [ecarCount]);
 
-        // **4. 更新 vehicle_data_filtered 表**
+        // **4. 更新 vehicle_data 表**
+
+        const vehTable = `vehicle_moving_data_${userId}`
+
         await client.query(`
-            UPDATE vehicle_data_filtered_copy AS vdf
+            UPDATE ${vehTable} AS vdf
             SET type = vt.type
             FROM vehicle_types AS vt
             WHERE vdf.id = vt.id
         `);
         //先删除原laeq数据
+        const laeqTable = `predicted_laeq_${userId}`
         await client.query(`
-            TRUNCATE TABLE predicted_laeq;
+            TRUNCATE TABLE ${laeqTable};
         `);
 
         console.log(`已更新 ${ecarCount} 辆电动车`);
@@ -201,11 +204,11 @@ async function updateVehicleTypes(ecarRatio) {
 }
 async function loadPLimit() {
     const { default: pLimit } = await import("p-limit");
-    return pLimit(50);  // 限制最大 10 个并发
+    return pLimit(50);  // 限制最大 50 个并发
 }
-async function processEcarRatioAndPredict(ecarRatio) {
+async function processEcarRatioAndPredict(ecarRatio, userId) {
     // **等待 SQL 执行完**
-    await updateVehicleTypes(ecarRatio);
+    await updateVehicleTypes(ecarRatio, userId);
 
     console.log("车辆数据已更新，开始预测...");
     const limit = await loadPLimit()
@@ -216,7 +219,7 @@ async function processEcarRatioAndPredict(ecarRatio) {
         let promise = limit(() => fetch("http://127.0.0.1:3000/predict", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ timestep })
+            body: JSON.stringify({ timestep, userId })
         }).then(res => res.text()));
         promises.push(promise);
     }

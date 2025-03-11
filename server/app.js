@@ -6,10 +6,8 @@ var app = express();
 
 const bodyParser = require('body-parser');
 const cors = require('cors');
-
 app.use(cors());
 app.use(bodyParser.json()); // for parsing post data that has json format
-
 // 启用 Brotli 或 Gzip 压缩
 app.use(compression({
   threshold: 0,
@@ -79,12 +77,12 @@ client.on("notification", async (msg) => {
 let receivers
 app.post("/predict", async (req, res) => {
   try {
-    let { timestep } = req.body;
+    let { timestep, userId } = req.body;
     if (timestep === undefined) {
       return res.status(400).json({ error: "Missing timestep" });
     }
 
-    let predictions = await processReceiversForTimestep(timestep, receivers);
+    let predictions = await processReceiversForTimestep(timestep, receivers, userId);
     //创建sql插入数据语句
     const values = predictions.map(pred => `(
       ${timestep}, 
@@ -93,9 +91,9 @@ app.post("/predict", async (req, res) => {
       ST_SetSRID(ST_MakePoint(${pred.lon}, ${pred.lat}), 4326), 
       ${pred.bg_pk}
     )`).join(",");
-
+    const laeqTable = `predicted_laeq_${userId}`
     const insertQuery = `
-      INSERT INTO predicted_laeq (timestep, idreceive, laeq, geom, bg_pk) 
+      INSERT INTO ${laeqTable} (timestep, idreceive, laeq, geom, bg_pk) 
       VALUES ${values};
     `;
     await pool.query("BEGIN");

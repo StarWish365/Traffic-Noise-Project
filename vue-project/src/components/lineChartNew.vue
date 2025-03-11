@@ -136,10 +136,10 @@ const updateChart = (laeqData) => {
 
 // 监听 `HeadValue.history` 数据的变化
 watch(
-  () => HeadValue.history, // 监听的数据
-  (newHistory) => {
-    if (newHistory && newHistory.length > 0) {
-      updateChart(newHistory); // 有效数据时更新图表
+  () => HeadValue.currentTime, // 监听的数据
+  () => {
+    if (HeadValue.history) {
+      updateChart(HeadValue.history.slice(0,HeadValue.currentTime-500)); // 有效数据时更新图表
     } else {
       updateChart(emptyData.laeq); // 没有数据时显示空图表
     }
@@ -152,6 +152,7 @@ onMounted(async () => {
   // 等待 DOM 渲染完成
   await nextTick();
   initChart(); // 初始化空图表
+  updateChart(HeadValue.history.slice(0, HeadValue.currentTime-500));
 });
 
 onBeforeUnmount(() => {

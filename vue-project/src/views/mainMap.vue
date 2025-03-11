@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted ,ref ,createApp,provide} from 'vue';
 import mapboxgl from'mapbox-gl';
+import request from '@/utils/request'
 import { useValueStore } from '@/stores/HeadValue';
 import { getNoiseHistory } from '@/composables/noiseHistory';
 import { getBuildingId} from '@/composables/getBuildingId';
@@ -138,7 +139,7 @@ onMounted(() => {
             // 创建一个空的 DOM 节点
             const container = document.createElement('div');
             // 将 Vue 组件挂载到该节点
-            createApp(barChart,{ chartData: ans }).mount(container);
+            createApp(barChart,{ chartData: ans,buildingName }).mount(container);
             container.style.width = '100%';  // 设置宽度
             container.style.height = '100%'; // 设置高度
             new AnimatedPopup({
@@ -204,7 +205,7 @@ onMounted(() => {
     container.style.height = '100%'; // 设置高度
     const { lng, lat } = e.lngLat; // 获取双击位置的经纬度
     console.log(`双击坐标: 经度 ${lng}, 纬度 ${lat}`);
-    await getNoiseHistory(lng, lat,currentTime.value,map,HeadValue,marker)
+    await getNoiseHistory(lng, lat,map,HeadValue,marker)
     let popup = new AnimatedPopup({
         maxWidth: '600px',
         offset: [-20, -30], 
@@ -225,10 +226,43 @@ onMounted(() => {
 });
 let currentTime = ref(500)
 const table = ref(false) //set for Drawbox
+HeadValue.currentTime = currentTime
 //传递给子组件
 provide('currentTime',currentTime)
 provide('map',map)
 provide('marker',marker)
+
+// 生成唯一 userId（如果不存在）
+function getUserId() {
+    let userId = localStorage.getItem("userId");
+    if (!userId) {
+        userId = "user_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem("userId", userId);
+    }
+    return userId;
+}
+
+const userId = getUserId();
+console.log("用户 ID:", userId);
+//请求生成临时表
+request.get('connect')
+//关闭页面自动删除临时表
+/* window.addEventListener("beforeunload", function () {
+    try {
+        request.get("logout");
+    } catch (error) {
+        console.error("❌ 退出请求失败:", error);
+    }
+}); */
+
+window.addEventListener("beforeunload", function () {
+    const userId = localStorage.getItem("userId");
+    if (userId) {
+        navigator.sendBeacon("http://localhost:3000/api/logout", JSON.stringify({ userId }));
+    }
+});
+
+
 
 </script>
 

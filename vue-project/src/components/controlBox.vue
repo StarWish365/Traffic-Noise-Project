@@ -3,7 +3,6 @@ import { inject, ref} from 'vue';
 import { ElButton } from 'element-plus';
 import { load_cars } from '@/composables/loadCars';
 import { load_noice } from '@/composables/loadNoise';
-import { getNextNoise } from '@/composables/changeChart';
 import { useValueStore } from '@/stores/HeadValue';
 import { getReceiverstoBuilding } from '@/composables/getReceiverstoBuilding';
 const HeadValue = useValueStore();
@@ -22,11 +21,6 @@ function cars_move() {
     load_cars(currentTime.value,map,HeadValue.sel,HeadValue);
 
     load_noice(currentTime.value,map,HeadValue)
-
-    if(HeadValue.idreceiver){
-        getNextNoise(HeadValue.idreceiver,currentTime.value,HeadValue)
-    }
-    //console.log("history:",HeadValue.history)
     currentTime.value++;
     timeout = setTimeout(cars_move, 1000);
 }

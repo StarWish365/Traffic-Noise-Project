@@ -1,11 +1,10 @@
 import request from '../utils/request'
 import mapboxgl from 'mapbox-gl';
-export function getNoiseHistory(lng, lat, time, map, HeadValue, marker) {
+export function getNoiseHistory(lng, lat, map, HeadValue, marker) {
     // 创建请求体数据
     const params = {
         longitude: lng,
         latitude: lat,
-        time: time
     };
 
     return request.get('get_noise_value', { params })
@@ -18,7 +17,6 @@ export function getNoiseHistory(lng, lat, time, map, HeadValue, marker) {
             HeadValue.idreceiver = idreceiver
             HeadValue.history = noiseHistory
             HeadValue.receiverCoordinates = coordinates
-            console.log("噪声点坐标", coordinates)
             // 如果上一次的 marker 存在，先将其移除
             if (marker.value) {
                 marker.value.remove();
