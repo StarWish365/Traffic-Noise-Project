@@ -308,9 +308,16 @@ router.get("/api/connect", async (req, res) => {
       );
       CREATE TABLE ${userTable_vehicle} AS TABLE vehicle_moving_data;
     `;
+    const createIndexQuery = `
+      CREATE INDEX idx_${userTable_laeq}_timestep ON ${userTable_laeq} (timestep);
+      CREATE INDEX idx_${userTable_vehicle}_vehicle ON ${userTable_vehicle} (timestep);
+    `;
 
     const client = await pool.connect();
+    await client.query("BEGIN");  // 开启事务
     await client.query(createTableQuery);
+    await client.query(createIndexQuery);
+    await client.query("COMMIT"); // 提交事务
     client.release();
 
     res.json({ success: true, message: "临时表已创建" });

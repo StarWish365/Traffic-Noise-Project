@@ -204,7 +204,7 @@ async function updateVehicleTypes(ecarRatio, userId) {
 }
 async function loadPLimit() {
     const { default: pLimit } = await import("p-limit");
-    return pLimit(50);  // 限制最大 50 个并发
+    return pLimit(10);  // 限制最大 50 个并发
 }
 async function processEcarRatioAndPredict(ecarRatio, userId) {
     // **等待 SQL 执行完**
