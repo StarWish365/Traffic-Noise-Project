@@ -96,9 +96,11 @@ app.post("/predict", async (req, res) => {
       INSERT INTO ${laeqTable} (timestep, idreceive, laeq, geom, bg_pk) 
       VALUES ${values};
     `;
-    await pool.query("BEGIN");
-    await pool.query(insertQuery);
-    await pool.query("COMMIT");
+    const client = await pool.connect()
+    await client.query("BEGIN");
+    await client.query(insertQuery);
+    await client.query("COMMIT");
+    client.release();
     res.json(predictions);
     /* console.log('Success', timestep); */
   } catch (error) {

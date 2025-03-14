@@ -7,18 +7,24 @@ import 'element-plus/es/components/option/style/css';
 import 'element-plus/es/components/slider/style/css';
 import 'element-plus/es/components/button/style/css';
 import 'element-plus/theme-chalk/el-tooltip.css';
+import { useValueStore } from '@/stores/HeadValue';
+const Headvalue = useValueStore()
 import request from '@/utils/request';
 import { ref } from "vue";
 
 const ecarRatio = ref(0);
 const response = ref('');
 const showResponse = ref(false); // 控制淡入淡出
+const buttonAvailable = ref(true)
 
 const changeECarRatio = async () => {
     try {
+        buttonAvailable.value = false
+        Headvalue.startPredict = true
         const res = await request.get(`change_ecar_ratio?ratio=${ecarRatio.value}`);
         response.value = res.data.success ? 'Success' : 'Failed';
-
+        buttonAvailable.value = true
+        Headvalue.startPredict = false
         // 触发淡入效果
         showResponse.value = true;
 
@@ -53,7 +59,7 @@ const changeECarRatio = async () => {
             <el-slider v-model="ecarRatio" :step="0.1" :max="1" class="slider" />
 
             <div class="button-container">
-                <el-button type="primary" @click="changeECarRatio">Confirm</el-button>
+                <el-button type="primary" @click="changeECarRatio" :disabled='!buttonAvailable'>Confirm</el-button>
             </div>
         </div>
         <transition name="fade">

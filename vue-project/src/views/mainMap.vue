@@ -247,13 +247,6 @@ console.log("用户 ID:", userId);
 //请求生成临时表
 request.get('connect')
 //关闭页面自动删除临时表
-/* window.addEventListener("beforeunload", function () {
-    try {
-        request.get("logout");
-    } catch (error) {
-        console.error("❌ 退出请求失败:", error);
-    }
-}); */
 
 window.addEventListener("beforeunload", function () {
     const userId = localStorage.getItem("userId");

@@ -6,7 +6,7 @@
         @mouseleave="hidePanel"
       >
         <p>Timeline</p>
-        <el-slider v-model="currentTime" :step="1" :min=500 :max=800 @input="onDrag" @change="onSeekEnd" />
+        <el-slider v-model="currentTime" :step="1" :min=500 :max=800 @input="onDrag" @change="onSeekEnd" :disabled = 'HeadValue.startPredict' />
       </div>
     </transition>
 

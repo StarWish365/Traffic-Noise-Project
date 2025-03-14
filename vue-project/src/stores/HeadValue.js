@@ -15,6 +15,7 @@ export const useValueStore = defineStore('HeadValue', () => {
   const receiverstoBuilding = reactive(null)
   const iscounting = ref(false)
   const currentTime = ref(null)
+  const startPredict = ref(false)
 
   // 定义 action 函数
   const addHistoryEntry = (entry) => {
@@ -28,6 +29,8 @@ export const useValueStore = defineStore('HeadValue', () => {
 
 
   // 返回状态和 action
-  return { heatP, sel, map_data, selected, history, idreceiver, FramebufferFactor, receiverCoordinates,
-     heatLayercontrol,vehicleLocation, receiverstoBuilding,iscounting,currentTime, addHistoryEntry, resetHistory }
+  return {
+    heatP, sel, map_data, selected, history, idreceiver, FramebufferFactor, receiverCoordinates,
+    heatLayercontrol, vehicleLocation, receiverstoBuilding, iscounting, currentTime, startPredict, addHistoryEntry, resetHistory
+  }
 })

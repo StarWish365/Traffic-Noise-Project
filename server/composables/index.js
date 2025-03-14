@@ -91,6 +91,9 @@ function formatFeatures(vehicles) {
 
 // 6. 处理 Receiver 并调用 Python API
 async function processReceiversForTimestep(timestep, receivers, userId) {
+    if (!activeUsers.has(userId)) {  // 🔥 关键点：检测是否被取消
+        return;  // 退出任务
+    }
     let vehicles = await getVehicleData(timestep, userId);
     loadVehiclesIntoRBush(vehicles);
 
@@ -206,7 +209,12 @@ async function loadPLimit() {
     const { default: pLimit } = await import("p-limit");
     return pLimit(10);  // 限制最大 50 个并发
 }
+
+// 记录当前正在运行的用户任务
+let activeUsers = new Set();
 async function processEcarRatioAndPredict(ecarRatio, userId) {
+    if (activeUsers.has(userId)) return;  // 避免重复执行
+    activeUsers.add(userId);
     // **等待 SQL 执行完**
     await updateVehicleTypes(ecarRatio, userId);
 
@@ -215,7 +223,6 @@ async function processEcarRatioAndPredict(ecarRatio, userId) {
     let promises = []
     // **循环执行 `/predict`**
     for (let timestep = 500; timestep < 800; timestep++) {
-        /* console.log(`预测 timestep: ${timestep}`); */
         let promise = limit(() => fetch("http://127.0.0.1:3000/predict", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -224,8 +231,14 @@ async function processEcarRatioAndPredict(ecarRatio, userId) {
         promises.push(promise);
     }
     let results = await Promise.allSettled(promises);
+    activeUsers.delete(userId);
     console.log("成功预测数量", promises.length);
 }
+
+processEcarRatioAndPredict.cancel = function (userId) {
+    console.log(`🛑 终止用户 ${userId} 的预测任务`);
+    activeUsers.delete(userId);  // 从 activeUsers 中删除，表示任务被终止
+};
 
 
 

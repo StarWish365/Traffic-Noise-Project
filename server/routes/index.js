@@ -319,6 +319,7 @@ router.get("/api/connect", async (req, res) => {
     await client.query(createIndexQuery);
     await client.query("COMMIT"); // 提交事务
     client.release();
+    console.log(`临时表已创建`);
 
     res.json({ success: true, message: "临时表已创建" });
 
@@ -342,6 +343,12 @@ router.post("/api/logout", express.text(), async (req, res) => {
     if (!userId) {
       return res.status(400).json({ error: "Missing userId" });
     }
+
+    // **先终止用户的预测任务**
+    processEcarRatioAndPredict.cancel(userId);
+
+    // **等待 2 秒，确保任务结束**
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     console.log(`🔴 用户 ${userId} 退出，清理临时表`);
 
