@@ -251,7 +251,8 @@ request.get('connect')
 window.addEventListener("beforeunload", function () {
     const userId = localStorage.getItem("userId");
     if (userId) {
-        navigator.sendBeacon("http://localhost:3000/api/logout", JSON.stringify({ userId }));
+        navigator.sendBeacon("http://162.62.218.192:3000/api/logout", JSON.stringify({ userId }));
+        /* navigator.sendBeacon("http://localhost:3000/api/logout", JSON.stringify({ userId })); */
     }
 });
 

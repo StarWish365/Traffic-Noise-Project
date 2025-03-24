@@ -82,6 +82,16 @@ router.get('/api/get_noise_value', (req, res) => {
   const lng = req.query.longitude
   const lat = req.query.latitude
   //console.log(time, lng, lat)
+  const authHeader = req.headers.authorization;
+  let userId = null;
+
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    userId = authHeader.split(" ")[1]; // 提取 Bearer token
+  }
+  if (!userId) {
+    return res.status(400).json({ error: "Missing userId" });
+  }
+  const userTable_laeq = `predicted_laeq_${userId}`;
   const q = `
     WITH query_point AS (
       -- 创建给定坐标的点几何，确保设置为 EPSG:4326
@@ -92,7 +102,7 @@ router.get('/api/get_noise_value', (req, res) => {
       SELECT 
           m.idreceive
       FROM 
-          predicted_laeq m, 
+          ${userTable_laeq} m, 
           query_point qp
       -- 按地理距离排序，取出最近的点
       ORDER BY 
@@ -244,6 +254,16 @@ router.get('/api/change_ecar_ratio', async (req, res) => {
 
 router.get('/api/get_receivers_to_building_time', (req, res) => {
   const time = req.query.time;
+  const authHeader = req.headers.authorization;
+  let userId = null;
+
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    userId = authHeader.split(" ")[1]; // 提取 Bearer token
+  }
+  if (!userId) {
+    return res.status(400).json({ error: "Missing userId" });
+  }
+  const userTable_laeq = `predicted_laeq_${userId}`;
   let q = `WITH receiver_over_noises AS (
     SELECT
         sr.bg_pk AS building_id,
@@ -253,7 +273,7 @@ router.get('/api/get_receivers_to_building_time', (req, res) => {
     FROM
         filtered_receivers sr
     LEFT JOIN
-        predicted_laeq ldf
+        ${userTable_laeq} ldf
     ON
         sr.idreceive = ldf.idreceive
     AND
@@ -346,9 +366,6 @@ router.post("/api/logout", express.text(), async (req, res) => {
 
     // **先终止用户的预测任务**
     processEcarRatioAndPredict.cancel(userId);
-
-    // **等待 2 秒，确保任务结束**
-    await new Promise(resolve => setTimeout(resolve, 2000));
 
     console.log(`🔴 用户 ${userId} 退出，清理临时表`);
 

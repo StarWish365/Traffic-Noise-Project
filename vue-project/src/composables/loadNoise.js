@@ -4,7 +4,7 @@ import { convertToGeoJSON } from './createGeoJSON'
 
 
 export function load_noice(time, map, store) {
-    request.get('get_noice_time?time=' + time).then(res => {
+    request.get('get_noice_time?time=' + time).then((res) => {
         const rawNoise = res.data[0].row_to_json.features.map(feature => ({
             lat: feature.geometry.coordinates[1],
             lon: feature.geometry.coordinates[0],

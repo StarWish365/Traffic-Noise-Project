@@ -104,7 +104,7 @@ app.post("/predict", async (req, res) => {
     res.json(predictions);
     /* console.log('Success', timestep); */
   } catch (error) {
-    console.error(error);
+    /* console.error(error); */
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
