@@ -15,9 +15,6 @@
       <el-checkbox class = 'layer-checkbox' v-model="HeadValue.heatLayercontrol" @change="controlHeatmap">
         Heatmap Layer
       </el-checkbox>
-      <router-link :to="{name:'data'}">
-        set data
-      </router-link>
     </div>
   </template>
   

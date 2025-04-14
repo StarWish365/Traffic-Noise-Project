@@ -4,17 +4,29 @@
 <template>
   <div id="legend" class="map-legend">
     <h4>Cars Legend</h4>
-    <div>
-      <span style="background-color: #00ff00;"></span> &lt; 20km/h
-    </div>
-    <div>
-      <span style="background-color: #ffa500;"></span> 20km-40km/h
-    </div>
-    <div>
-      <span style="background-color: #ff0000;"></span> &gt; 40km/h
-    </div>
-    <div>
-      <span style="background-color: #1938a4; width: 18px; height: 18px;"></span> e-cars
+    <div class="seperate-icon">
+      <div class="car-legend">
+        <div>
+          <span style="background-color: #00ff00;"></span> &lt; 20km/h
+        </div>
+        <div>
+          <span style="background-color: #ffa500;"></span> 20km-40km/h
+        </div>
+        <div>
+          <span style="background-color: #ff0000;"></span> &gt; 40km/h
+        </div>
+      </div>
+      <div class="car-legend">
+        <div>
+          <span style="background-color: #012fff; width: 18px; height: 18px;"></span> e-cars &lt; 20km/h
+        </div>
+        <div>
+          <span style="background-color: #0824a1; width: 18px; height: 18px;"></span> e-cars 20km-40km/h
+        </div>
+        <div>
+          <span style="background-color: #04135b; width: 18px; height: 18px;"></span> e-cars &gt; 40km/h
+        </div>
+      </div>
     </div>
 
     <!-- 热力图色条 -->
@@ -49,8 +61,14 @@
   margin: 10px 0;
   font-size: 16px;
 }
-
-.map-legend div {
+.map-legend .seperate-icon {
+  display: flex;
+  flex-direction: row;
+}
+.map-legend .seperate-icon .car-legend {
+  margin: 5px;
+}
+.map-legend .seperate-icon .car-legend div {
   display: flex;
   align-items: center;
 }

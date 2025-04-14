@@ -40,7 +40,9 @@ export function load_cars(time, map, sel, store) {
                         'circle-color': [
                             'case',
                             //set icon for different speed and cars
-                            ['==', ['get', 'type'], 1], '#1938a4',
+                            ['all', ['==', ['get', 'type'], 1], ['<', ['get', 'speed'], 5.55]], '#012fff',
+                            ['all', ['==', ['get', 'type'], 1], ['<', ['get', 'speed'], 11.11]], '#0824a1',
+                            ['all', ['==', ['get', 'type'], 1], ['>=', ['get', 'speed'], 11.11]], '#04135b',
                             ['all', ['==', ['get', 'type'], 0], ['<', ['get', 'speed'], 5.55]], '#00ff00',
                             ['all', ['==', ['get', 'type'], 0], ['<', ['get', 'speed'], 11.11]], '#ffa500',
                             ['all', ['==', ['get', 'type'], 0], ['>=', ['get', 'speed'], 11.11]], '#ff0000',

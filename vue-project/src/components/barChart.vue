@@ -42,7 +42,7 @@
       },
       xAxis: {
         type: "category",
-        data: ["1-10", "10-20", "20+"],
+        data: ["1-25", "25-50", "50+"],
         name: "Total Time Exceeding Threshold",
         nameLocation: "middle",
         nameTextStyle: {
