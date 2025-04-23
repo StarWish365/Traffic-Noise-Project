@@ -116,7 +116,7 @@ router.get('/api/get_noise_value', (req, res) => {
           array_agg(m.laeq ORDER BY m.timestep) AS laeq_list,
           ST_SetSRID(ST_Force2D(min(m.geom)), 4326) AS geom -- 这里去掉了额外的逗号
       FROM 
-          predicted_laeq m
+          ${userTable_laeq} m
       JOIN 
           closest_point cp ON m.idreceive = cp.idreceive
       GROUP BY 

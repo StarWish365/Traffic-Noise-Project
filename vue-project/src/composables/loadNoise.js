@@ -90,7 +90,7 @@ function updateVehicleIndex(vehicleData) {
 
 
 function filterNoisePoints(noisePoints) {
-    const area = 0.0005
+    const area = 0.001
     return noisePoints.filter(noisePoint => {
         // 查询 20m 半径内的车辆
         let vehicles20m = vehicleTree.search({

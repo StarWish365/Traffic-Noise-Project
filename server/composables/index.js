@@ -18,7 +18,7 @@ const { pool } = require('../database/db')
 async function loadReceivers() {
     try {
         const client = await pool.connect();
-        const result = await client.query("SELECT idreceive, ST_X(geom) AS lon, ST_Y(geom) AS lat, bg_pk,is_blocked FROM filtered_receivers");
+        const result = await client.query("SELECT idreceive, ST_X(geom) AS lon, ST_Y(geom) AS lat, bg_pk, is_blocked FROM filtered_receivers");
         client.release();
         return result.rows
     } catch (error) {
