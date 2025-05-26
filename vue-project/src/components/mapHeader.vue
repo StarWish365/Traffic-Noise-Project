@@ -11,6 +11,7 @@
 
 <style scoped>
    .header {
+    height: 5vh;
     background-color: #333;
     color: #fff;
     padding: 10px;

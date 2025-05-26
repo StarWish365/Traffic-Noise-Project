@@ -6,7 +6,7 @@ import mapFooter from './components/mapFooter.vue';
 <template>
   <mapHeader></mapHeader>
   <router-view></router-view>
-  <mapFooter></mapFooter>
+<!--   <mapFooter></mapFooter> -->
 </template>
 
 <style scoped></style>

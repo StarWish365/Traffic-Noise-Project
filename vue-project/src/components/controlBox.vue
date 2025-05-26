@@ -1,5 +1,5 @@
 <script setup>
-import { inject, ref} from 'vue';
+import { defineExpose, inject, ref} from 'vue';
 import { ElButton } from 'element-plus';
 import { load_cars } from '@/composables/loadCars';
 import { load_noice } from '@/composables/loadNoise';
@@ -65,7 +65,9 @@ function refreshCount() {
     //重置ReceivertoBuilding映射
     getReceiverstoBuilding(HeadValue)
 }
-
+    defineExpose({
+    startCount
+    });
 </script>
 
 <template>

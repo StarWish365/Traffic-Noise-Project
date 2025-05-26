@@ -43,7 +43,7 @@
       xAxis: {
         type: "category",
         data: ["1-25", "25-50", "50+"],
-        name: "Total Time Exceeding Threshold",
+        name: "Total duration of exposure above threshold(65db)",
         nameLocation: "middle",
         nameTextStyle: {
         padding: [10, 0, 0, 0], // 调整名称位置
@@ -51,7 +51,10 @@
       },
       yAxis: {
         type: "value",
-        name: "Population"
+        name: "Effected number of people",
+        nameTextStyle: {
+        padding: [0, 0, 0, 100], // 调整名称位置
+        },
       },
       series: [
         {

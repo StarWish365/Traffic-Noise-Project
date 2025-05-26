@@ -16,7 +16,7 @@ export function load_noice(time, map, store) {
         updateVehicleIndex(store.vehicleLocation)
         const noise = filterNoisePoints(rawNoise)
         console.log("取receivers数量:", noise.length)
-        const geojsonData = convertToGeoJSON(noise)
+        const geojsonData = convertToGeoJSON(rawNoise)
         if (!map.value.getSource('receivers')) {
             /* console.log(geojsonData) */
             map.value.addSource('receivers', {
@@ -28,8 +28,15 @@ export function load_noice(time, map, store) {
                 'type': 'circle',
                 'source': 'receivers',
                 'paint': {
-                    'circle-radius': 3,
-                    'circle-color': '#292c34'
+                    'circle-radius': 5,
+                    'circle-color': [
+                        'interpolate',
+                        ['linear'],
+                        ['get', 'val'],
+                        30, '#5c68c4',   // Blue for low noise
+                        50, '#5fdc5f',
+                        70, '#c15f4f'    // Red for high noise
+                    ]
                 }
             })
             map.value.setLayoutProperty('noise-receivers', 'visibility', 'none');
@@ -60,7 +67,7 @@ export function load_noice(time, map, store) {
                     maxValue: 70,
                 });
                 map.value.removeLayer('noise');
-                map.value.addLayer(layer, 'cars-layer');
+                map.value.addLayer(layer, 'buildings-fill');
             }
         }
 

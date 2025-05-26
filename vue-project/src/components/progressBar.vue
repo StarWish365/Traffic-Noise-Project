@@ -84,7 +84,7 @@ function updateBuildingColors(buildingData, map) {
 }
 
     
-  const isVisible = ref(false)
+  const isVisible = ref(true)
   let parentElement = null
   
   const showPanel = () => {
@@ -92,7 +92,7 @@ function updateBuildingColors(buildingData, map) {
   }
   
   const hidePanel = () => {
-    isVisible.value = false
+    isVisible.value = true
   }
   const handleMouseMove = (event) => {
   if (!parentElement) return

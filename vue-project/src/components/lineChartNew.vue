@@ -13,6 +13,7 @@ const emptyData = {
   laeq: [],
   timestepStart: 500, // 横坐标起始值 (timestep)
 };
+const idreceiver = HeadValue.idreceiver? HeadValue.idreceiver:''
 
 // 初始化图表函数
 const initChart = (laeqData = emptyData.laeq) => {
@@ -30,7 +31,7 @@ const initChart = (laeqData = emptyData.laeq) => {
     const option = {
         animation:false,
       title: {
-        text: 'Noise History',
+        text: `Noise History of Receiver${idreceiver}`,
         left: 'center',
       },
       tooltip: {

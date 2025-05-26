@@ -5,7 +5,6 @@
         v-for="layer in layers"
         :key="layer.id"
         v-model="layer.visible"
-        :disabled="!layer.avaliable"
         @change="toggleLayerVisibility(layer.id, layer.visible)"
         :label="layer.name"
         class="layer-checkbox"
@@ -30,7 +29,7 @@
   const map = inject('map');
   const currentTime = inject('currentTime');
   const layers = reactive([
-    { id: 'add-3d-buildings', name: 'Building', visible: true , avaliable: true},
+    { id: 'buildings-fill', name: 'Building', visible: true , avaliable: true},
     { id: 'noise-receivers', name: 'Receivers', visible: false, avaliable: false },
     { id: 'cars-layer', name: 'Cars', visible: true ,avaliable: false},
   ]);
@@ -60,8 +59,8 @@
   const controlHeatmap = ()=>{
     if(map.value.getLayer('noise') && !HeadValue.heatLayercontrol){
       map.value.removeLayer('noise');
-      map.value.removeLayer('noise-receivers');
-      map.value.removeSource('receivers');
+/*       map.value.removeLayer('noise-receivers');
+      map.value.removeSource('receivers'); */
     } 
     if(!map.value.getLayer('noise') && HeadValue.heatLayercontrol) load_noice(currentTime.value,map,HeadValue)
   }

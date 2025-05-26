@@ -18,13 +18,13 @@
       </div>
       <div class="car-legend">
         <div>
-          <span style="background-color: #012fff; width: 18px; height: 18px;"></span> e-cars &lt; 20km/h
+          <span style="background-color: #012fff; width: 18px; height: 18px;"></span> EV &lt; 20km/h
         </div>
         <div>
-          <span style="background-color: #0824a1; width: 18px; height: 18px;"></span> e-cars 20km-40km/h
+          <span style="background-color: #0824a1; width: 18px; height: 18px;"></span> EV 20km-40km/h
         </div>
         <div>
-          <span style="background-color: #04135b; width: 18px; height: 18px;"></span> e-cars &gt; 40km/h
+          <span style="background-color: #04135b; width: 18px; height: 18px;"></span> EV&gt; 40km/h
         </div>
       </div>
     </div>
@@ -36,6 +36,23 @@
       <div class="heatmap-labels">
         <span>30db</span>
         <span>70db</span>
+      </div>
+    </div>
+    <h4>Building Legend</h4>
+    <div class="seperate-icon">
+      <div class="car-legend">
+        <div>
+          <span style="background-color: #aaa;border-radius: 0%;"></span>No one lives or little noise exposure
+        </div>
+        <div>
+          <span style="background-color: #Ffff00;border-radius: 0%;"></span> Low noise exposure
+        </div>
+        <div>
+          <span style="background-color: #ffa500;border-radius: 0%;"></span> Medium noise exposure
+        </div>
+        <div>
+          <span style="background-color: #ff0000;border-radius: 0%;"></span> High noise exposure
+        </div>
       </div>
     </div>
   </div>
@@ -64,6 +81,7 @@
 .map-legend .seperate-icon {
   display: flex;
   flex-direction: row;
+  gap: 3px;
 }
 .map-legend .seperate-icon .car-legend {
   margin: 5px;
@@ -93,7 +111,7 @@
   width: 100%;
   height: 15px;
   border-radius: 5px;
-  background: linear-gradient(to right, #5c68c4, #c15f4f);
+  background: linear-gradient(to right, #5c68c4,#5fdc5f,#c15f4f);
   border: 1px solid #ccc;
 }
 

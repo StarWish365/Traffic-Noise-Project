@@ -10,15 +10,20 @@ import 'element-plus/theme-chalk/el-tooltip.css';
 import { useValueStore } from '@/stores/HeadValue';
 const Headvalue = useValueStore()
 import request from '@/utils/request';
-import { ref } from "vue";
+import { ref, inject } from "vue";
 
 const ecarRatio = ref(0);
 const response = ref('');
 const showResponse = ref(false); // 控制淡入淡出
 const buttonAvailable = ref(true)
+const controlRef = inject('controlRef')
+const tableRef = inject('tableRef')
+
 
 const changeECarRatio = async () => {
     try {
+        tableRef.value=false
+        controlRef.value?.startCount()
         buttonAvailable.value = false
         Headvalue.startPredict = true
         const res = await request.get(`change_ecar_ratio?ratio=${ecarRatio.value}`);
@@ -45,13 +50,13 @@ const changeECarRatio = async () => {
 </script>
 
 <template>
-    <h3>Control e-Car Ratio</h3>
+    <h3>Control EV Ratio</h3>
 
     <div class="factor-container">
         <div class = 'slider-container'>
             <el-tooltip placement="top-start">
             <template #content>
-                Number affecting the computation of the color. <br /> A high value makes the color uniform around each point.
+                Percentage of electric vehicles.
             </template>
             <span>Ratio</span>
             </el-tooltip>

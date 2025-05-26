@@ -21,6 +21,7 @@ import 'element-plus/es/components/button/style/css';
 import 'element-plus/es/components/drawer/style/css';
 import factorBox from '@/components/factorBox.vue';
 import controlBox from '@//components/controlBox.vue';
+import InstructionDialog from '@/components/InstructionDialog.vue'
 
 
 const HeadValue = useValueStore()
@@ -36,8 +37,8 @@ onMounted(() => {
     map.value = new mapboxgl.Map({
         container: 'mapid', 
         style: style, 
-        center: [18.081889381459572, 59.31681882851151],
-        zoom: 13,
+        center: [18.05063098207004, 59.31738134579155],
+        zoom: 15,
         /* minZoom:12, */
         projection: 'mercator'
     });
@@ -96,7 +97,7 @@ onMounted(() => {
                             15.05,
                             ['get', 'min_height']
                         ],
-                        'fill-extrusion-opacity': 0.6
+                        'fill-extrusion-opacity': 0
                     }
                 },
                 labelLayerId
@@ -191,9 +192,51 @@ onMounted(() => {
             'minzoom': 15,
             'paint': {
                 'fill-color': ['get', 'color'], // 从 properties 读取颜色
-                'fill-opacity': 0.6
+                'fill-opacity': [
+                'case',
+                ['boolean', ['feature-state', 'hover'], false],
+                0.6,  // 悬停时的不透明度
+                1   // 默认不透明度
+            ]
             }
         });
+        // 当前悬停的要素ID
+    let hoveredBuildingId = null;
+
+    // 鼠标移动事件处理
+    map.value.on('mousemove', 'buildings-fill', (e) => {
+        if (e.features.length > 0) {
+            // 如果有悬停的要素，重置之前悬停的要素样式
+            if (hoveredBuildingId !== null) {
+                map.value.setFeatureState(
+                    { source: 'buildings', id: hoveredBuildingId },
+                    { hover: false }
+                );
+            }
+            
+            // 设置新悬停要素的样式
+            hoveredBuildingId = e.features[0].id;
+            map.value.setFeatureState(
+                { source: 'buildings', id: hoveredBuildingId },
+                { hover: true }
+            );
+            
+            // 更改鼠标指针样式
+            map.value.getCanvas().style.cursor = 'pointer';
+        }
+    });
+
+    // 鼠标离开图层区域时
+    map.value.on('mouseleave', 'buildings-fill', () => {
+        if (hoveredBuildingId !== null) {
+            map.value.setFeatureState(
+                { source: 'buildings', id: hoveredBuildingId },
+                { hover: false }
+            );
+        }
+        hoveredBuildingId = null;
+        map.value.getCanvas().style.cursor = '';
+    });
 });
 
     map.value.on('dblclick',async (e) => {
@@ -225,7 +268,7 @@ onMounted(() => {
     getReceiverstoBuilding(HeadValue)
 });
 let currentTime = ref(500)
-const table = ref(false) //set for Drawbox
+const table = ref(true) //set for Drawbox
 HeadValue.currentTime = currentTime
 //传递给子组件
 provide('currentTime',currentTime)
@@ -251,18 +294,22 @@ request.get('connect')
 window.addEventListener("beforeunload", function () {
     const userId = localStorage.getItem("userId");
     if (userId) {
-        /* navigator.sendBeacon("http://162.62.218.192:3000/api/logout", JSON.stringify({ userId })); */
-        navigator.sendBeacon("http://localhost:3000/api/logout", JSON.stringify({ userId }));
+        /* navigator.sendBeacon("http://localhost:3000/api/logout", JSON.stringify({ userId })); */
+        navigator.sendBeacon("/api/logout", JSON.stringify({ userId }));
     }
 });
 
+const controlRef = ref()
+provide('controlRef', controlRef)
+provide('tableRef',table)
 
 
 </script>
 
 <template>
     <div id="mapid">
-        <controlBox/>
+        <controlBox ref="controlRef"/>
+        <InstructionDialog />
         <el-button @click="table = true" class ='factorbutton' circle>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="24" height="24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
@@ -295,7 +342,7 @@ window.addEventListener("beforeunload", function () {
     /* aspect-ratio: 1 / 1;
     max-width: 100%;
     max-height: 100vh;  */
-    height: 100vh;
+    height: 90vh;
     width: 100%;
     box-sizing: border-box;
     .factorbutton {
@@ -308,7 +355,7 @@ window.addEventListener("beforeunload", function () {
 
 .container {
     width: 100%;
-    height: 100vh;
+    height: 80vh;
     display: flex;
     justify-content: space-between;
     background-color:aqua;

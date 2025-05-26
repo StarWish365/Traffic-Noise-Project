@@ -1,8 +1,9 @@
 import axios from 'axios'
 
 const instance = axios.create({
-    /* baseURL: 'http://162.62.218.192:3000/api/' */
-    baseURL: 'http://localhost:3000/api/'
+    baseURL: '/api/'
+    /*  baseURL: 'http://geor.proj.kth.se:3000/api/' */
+    /* baseURL: 'http://localhost:3000/api/' */
 });
 
 // 添加请求拦截器
